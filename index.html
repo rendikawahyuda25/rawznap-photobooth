@@ -44,6 +44,19 @@ p{margin:0;line-height:1.5}
 .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
 .flash.on{animation:fl .35s ease-out}
 @keyframes fl{0%{opacity:.95}100%{opacity:0}}
+.hitung{background:#ffffff14;border:1px solid #ffffff22;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.hitung p{margin:0;font-size:.9rem;color:#cfe0d6}
+.hitung b{color:var(--snow)}
+.kotak{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;text-align:center}
+.kotak div{background:#0b2d22;border-radius:10px;padding:8px 2px}
+.kotak strong{display:block;font-size:1.5rem;line-height:1.1;color:var(--gold);font-variant-numeric:tabular-nums}
+.kotak span{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:#cfe0d6}
+.hitung.akhir .kotak strong{color:#ff9a8f}
+.gif{display:block;max-width:240px;width:100%;height:auto;border-radius:10px;margin:0 auto;background:#0006}
+.modal{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:20px;background:#000a}
+.modal-isi{width:100%;max-width:400px;background:var(--pine);border:1px solid #ffffff33;border-radius:18px;padding:22px 18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 60px #000a}
+.modal-isi h2{margin:0;font-size:1.25rem}
+a.btn{display:block;text-align:center;text-decoration:none;line-height:22px}
 .pilih{width:100%;min-height:46px;border-radius:12px;border:2px solid #ffffff44;background:#0b2d22;color:var(--snow);font:inherit;padding:0 12px}
 .dots{display:flex;gap:8px;justify-content:center}
 .dots i{width:14px;height:14px;border-radius:50%;background:#ffffff33}
@@ -64,6 +77,16 @@ footer{margin-top:4px;text-align:center;font-size:.8rem;color:#9fb8aa}
   <header>
     <h1><small>@rawznap.box</small><span id="judul">Photobooth Natal</span></h1>
   </header>
+
+  <div class="hitung" id="hitung" role="group" aria-label="Sisa waktu program Natal" hidden>
+    <p>Program Natal berlaku sampai <b id="batas-teks">31 Desember 2026, 23.59.59 WIB</b></p>
+    <div class="kotak">
+      <div><strong id="t-hari">0</strong><span>Hari</span></div>
+      <div><strong id="t-jam">00</strong><span>Jam</span></div>
+      <div><strong id="t-menit">00</strong><span>Menit</span></div>
+      <div><strong id="t-detik">00</strong><span>Detik</span></div>
+    </div>
+  </div>
 
   <!-- 1. PILIH FRAME -->
   <section class="screen" id="s-pilih">
@@ -98,13 +121,20 @@ footer{margin-top:4px;text-align:center;font-size:.8rem;color:#9fb8aa}
       <button class="btn alt" id="btn-ulang">Foto Lagi</button>
     </div>
     <p class="muted" id="hint-ios">Kalau foto tidak otomatis tersimpan, tahan lama pada gambar lalu pilih Simpan.</p>
-    <div class="box" id="ig-box" hidden>
-      <p><b>Foto tersimpan.</b> Kamu akan diarahkan ke Instagram @rawznap.box dalam <span id="ig-detik">4</span> detik.</p>
-      <div class="row">
-        <button class="btn" id="btn-ig">Buka Instagram Sekarang</button>
-        <button class="btn alt" id="btn-ig-batal">Nanti Dulu</button>
-      </div>
+    <div class="box" id="gif-box" hidden>
+      <p id="gif-status" class="muted" aria-live="polite"></p>
+      <img class="gif" id="gif-img" alt="GIF proses berfotomu" hidden>
+      <button class="btn alt" id="btn-gif" disabled>Simpan GIF</button>
     </div>
+  </section>
+
+  <!-- PROGRAM SELESAI -->
+  <section class="screen" id="s-selesai" hidden>
+    <div class="box">
+      <p><b>Program Natal RAWZNAP sudah berakhir.</b></p>
+      <p class="muted">Terima kasih sudah ikut berfoto. Sampai jumpa di program berikutnya, ikuti kami di Instagram supaya tidak ketinggalan.</p>
+    </div>
+    <a class="btn gold" id="ig-selesai" href="https://www.instagram.com/rawznap.box/" style="display:block;text-align:center;text-decoration:none;line-height:22px">Ikuti @rawznap.box</a>
   </section>
 
   <!-- PESAN ERROR -->
@@ -115,6 +145,15 @@ footer{margin-top:4px;text-align:center;font-size:.8rem;color:#9fb8aa}
     <button class="btn alt" id="btn-coba-lagi">Coba Kamera Lagi</button>
   </section>
 
+  <div class="modal" id="modal-ig" role="dialog" aria-modal="true" aria-labelledby="modal-judul" hidden>
+    <div class="modal-isi">
+      <h2 id="modal-judul">Fotomu sudah tersimpan</h2>
+      <p class="muted">Mau mampir ke Instagram @rawznap.box? Ikuti kami supaya tidak ketinggalan program berikutnya.</p>
+      <a class="btn" id="btn-ig-modal" href="https://www.instagram.com/rawznap.box/" target="_blank" rel="noopener">Buka Instagram</a>
+      <button class="btn alt" id="btn-modal-tutup" type="button">Nanti saja</button>
+    </div>
+  </div>
+
   <footer>RAWZNAP · Photobox Kalimantan Barat</footer>
 </main>
 
@@ -124,7 +163,7 @@ footer{margin-top:4px;text-align:center;font-size:.8rem;color:#9fb8aa}
 // ====== PENGATURAN (jarang perlu diubah) ======
 var HITUNG_MUNDUR = 3;          // detik antar jepretan
 var LEBAR_HASIL   = 1200;       // lebar gambar akhir (px)
-var REDIRECT_DETIK = 4;
+var BERAKHIR_DEFAULT = "2026-12-31T23:59:59+07:00";   // batas program (bisa diganti lewat frames.json)
 var IG_DEFAULT = "https://www.instagram.com/rawznap.box/";
 var MAKS_FOTO = 6;
 
@@ -132,10 +171,47 @@ var $ = function(id){ return document.getElementById(id); };
 var config = { instagram: IG_DEFAULT, frames: [] };
 var frameDipilih = null, frameImg = null, slots = [], skala = 2, fW = 600, fH = 1800;
 var stream = null, foto = [], sedangJepret = false, cerminAktif = true, kameraId = null;
-var hasilBlob = null, hasilUrl = null, igTimer = null, token = 0, pilihToken = 0;
+var hasilBlob = null, hasilUrl = null, gifBlob = null, gifUrl = null, token = 0, pilihToken = 0, modalSudah = false, gifToken = 0;
+var rekam = { timer:null, frames:[], w:320, h:240, interval:125 };
+var akhirMs = Date.parse(BERAKHIR_DEFAULT), offsetWaktu = 0, hitungTimer = null;
+
+// ====== HITUNG MUNDUR PROGRAM ======
+function sekarang(){ return Date.now() + offsetWaktu; }
+function sudahBerakhir(){ return isFinite(akhirMs) && sekarang() >= akhirMs; }
+function dua(n){ return (n < 10 ? "0" : "") + n; }
+function teksBatas(){
+  try {
+    var t = new Intl.DateTimeFormat("id-ID", { timeZone:"Asia/Jakarta", day:"numeric", month:"long", year:"numeric" }).format(new Date(akhirMs));
+    var j = new Intl.DateTimeFormat("id-ID", { timeZone:"Asia/Jakarta", hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false }).format(new Date(akhirMs)).replace(/:/g,".");
+    return t + ", " + j + " WIB";
+  } catch(e){ return "31 Desember 2026, 23.59.59 WIB"; }
+}
+function perbaruiHitung(){
+  if(!isFinite(akhirMs)){ $("hitung").hidden = true; return; }
+  var sisa = akhirMs - sekarang();
+  if(sisa <= 0){
+    $("hitung").hidden = true;
+    if(hitungTimer){ clearInterval(hitungTimer); hitungTimer = null; }
+    if(!$("s-pilih").hidden) tampil("s-pilih");   // alihkan ke layar selesai
+    return;
+  }
+  var d = Math.floor(sisa / 86400000), j = Math.floor(sisa / 3600000) % 24,
+      m = Math.floor(sisa / 60000) % 60, dt = Math.floor(sisa / 1000) % 60;
+  $("t-hari").textContent = String(d); $("t-jam").textContent = dua(j);
+  $("t-menit").textContent = dua(m); $("t-detik").textContent = dua(dt);
+  $("hitung").classList.toggle("akhir", sisa < 86400000);   // 24 jam terakhir: angka merah muda
+  $("hitung").hidden = false;
+}
+function mulaiHitung(){
+  if(!isFinite(akhirMs)) return;
+  $("batas-teks").textContent = teksBatas();
+  perbaruiHitung();
+  if(!hitungTimer && !sudahBerakhir()) hitungTimer = setInterval(perbaruiHitung, 1000);
+}
 
 function tampil(id){
-  ["s-pilih","s-kamera","s-hasil","s-error"].forEach(function(s){ $(s).hidden = (s !== id); });
+  if(id === "s-pilih" && sudahBerakhir()){ id = "s-selesai"; $("hitung").hidden = true; }
+  ["s-pilih","s-kamera","s-hasil","s-error","s-selesai"].forEach(function(s){ $(s).hidden = (s !== id); });
   window.scrollTo(0,0);
 }
 
@@ -143,8 +219,14 @@ function tampil(id){
 function muatConfig(){
   return fetch("frames.json",{cache:"no-cache"}).then(function(r){
     if(!r.ok) throw new Error("frames.json");
+    // pakai jam server (bukan jam perangkat) supaya hitung mundur tidak bisa diakali dengan mengubah jam HP
+    var dh = Date.parse(r.headers.get("Date") || "");
+    if(isFinite(dh)) offsetWaktu = dh - Date.now();
     return r.json();
   }).then(function(j){
+    if(j && j.berakhir){ var b = Date.parse(j.berakhir); if(isFinite(b)) akhirMs = b; }
+    if(j && j.berakhir === false) akhirMs = NaN;
+    $("ig-selesai").href = (j && j.instagram) || IG_DEFAULT; $("btn-ig-modal").href = (j && j.instagram) || IG_DEFAULT;
     if(j && Array.isArray(j.frames)) config.frames = j.frames;
     if(j && j.instagram) config.instagram = j.instagram;
     if(j && j.judul) { $("judul").textContent = j.judul; document.title = j.judul; }
@@ -224,11 +306,12 @@ function pilihFrame(i){
 
 // ====== KAMERA ======
 function hentikanKamera(){
+  if(!sedangJepret) stopRekam();
   if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; }
   $("video").srcObject = null;
 }
 function error(pesan, bolehGaleri){
-  hentikanKamera();
+  stopRekam(); hentikanKamera();
   $("err-teks").textContent = pesan;
   $("lbl-galeri").style.display = bolehGaleri === false ? "none" : "block";
   tampil("s-error");
@@ -297,8 +380,9 @@ function siapkanLayarKamera(){
   th.style.gridTemplateColumns = "repeat(" + Math.min(slots.length,4) + ",minmax(0,1fr))";
 }
 function mulaiSesi(){
+  if(sudahBerakhir()){ tampil("s-pilih"); return; }
   if(!frameImg || !slots.length) return;
-  foto = []; sedangJepret = false; token++;
+  foto = []; sedangJepret = false; token++; stopRekam();
   siapkanLayarKamera();
   $("count").textContent = "";
   $("btn-jepret").disabled = false; $("pilih-kamera").disabled = false; $("btn-jepret").textContent = "Mulai Hitung Mundur";
@@ -334,6 +418,7 @@ function jepretBerurutan(){
   var v = $("video");
   if(!stream || !v.videoWidth){ error("Kamera belum siap. Coba lagi.", true); return; }
   sedangJepret = true; $("btn-jepret").disabled = true; $("pilih-kamera").disabled = true;
+  gifToken++; mulaiRekam();
   var my = token, total = slots.length;
   (function langkah(){
     if(my !== token) return;
@@ -376,7 +461,7 @@ function dariGaleri(files){
 
 // ====== HASIL ======
 function buatHasil(){
-  hentikanKamera();
+  stopRekam(); hentikanKamera();
   var c = document.createElement("canvas");
   c.width = Math.round(fW*skala); c.height = Math.round(fH*skala);
   var ctx = c.getContext("2d");
@@ -392,36 +477,191 @@ function buatHasil(){
     if(hasilUrl) URL.revokeObjectURL(hasilUrl);
     hasilBlob = b; hasilUrl = URL.createObjectURL(b);
     $("hasil-img").src = hasilUrl;
-    batalIg(); $("ig-box").hidden = true;
+    modalSudah = false; $("modal-ig").hidden = true;
     tampil("s-hasil");
+    mulaiGif();
   }, "image/png");
+}
+function simpanBlob(blob, url, nama){
+  var a = document.createElement("a");
+  a.href = url; a.download = nama;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 function unduh(){
   if(!hasilBlob || !hasilUrl) return;
-  var a = document.createElement("a");
-  a.href = hasilUrl; a.download = "rawznap-natal-" + Date.now() + ".png";
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  mulaiHitungIg();
+  simpanBlob(hasilBlob, hasilUrl, "rawznap-natal-" + Date.now() + ".png");
+  bukaModalIg($("btn-unduh"));
 }
-function mulaiHitungIg(){
-  batalIg();
-  var n = REDIRECT_DETIK; $("ig-detik").textContent = String(n); $("ig-box").hidden = false;
-  igTimer = setInterval(function(){
-    n--; $("ig-detik").textContent = String(Math.max(n,0));
-    if(n <= 0){ batalIg(); bukaIg(); }
-  }, 1000);
+function unduhGif(){
+  if(!gifBlob || !gifUrl) return;
+  simpanBlob(gifBlob, gifUrl, "rawznap-natal-" + Date.now() + ".gif");
+  bukaModalIg($("btn-gif"));
 }
-function batalIg(){ if(igTimer){ clearInterval(igTimer); igTimer = null; } }
-function bukaIg(){ window.location.href = config.instagram; }
+
+// ====== POP UP INSTAGRAM (muncul sekali per hasil, pengunjung yang memilih) ======
+var fokusBalik = null;
+function bukaModalIg(dariTombol){
+  if(modalSudah) return;
+  modalSudah = true; fokusBalik = dariTombol || null;
+  $("modal-ig").hidden = false; $("btn-ig-modal").focus();
+}
+function tutupModalIg(){
+  $("modal-ig").hidden = true;
+  if(fokusBalik && fokusBalik.focus) fokusBalik.focus();
+}
+
+// ====== REKAM PROSES BERFOTO -> GIF ======
+function mulaiRekam(){
+  stopRekam(); rekam.frames = [];
+  var sl = slots[0];
+  rekam.w = 320; rekam.h = Math.max(2, Math.round(320 * sl[3] / sl[2]));
+  var durasi = slots.length * (HITUNG_MUNDUR + 0.7) * 1000;
+  rekam.interval = Math.max(125, Math.round(durasi / 150));      // paling banyak ~150 gambar
+  var c = document.createElement("canvas"); c.width = rekam.w; c.height = rekam.h;
+  var x = c.getContext("2d", {willReadFrequently:true}), v = $("video");
+  function ambil(){
+    if(!v.videoWidth) return;
+    try {
+      gambarCover(x, v, v.videoWidth, v.videoHeight, rekam.w, rekam.h, cerminAktif);
+      rekam.frames.push(x.getImageData(0,0,rekam.w,rekam.h).data);
+    } catch(e){}
+  }
+  ambil(); rekam.timer = setInterval(ambil, rekam.interval);
+}
+function stopRekam(){ if(rekam.timer){ clearInterval(rekam.timer); rekam.timer = null; } }
+
+// Palet 256 warna dari semua gambar (median cut), lalu tabel pencari warna terdekat
+function bangunPalet(frames){
+  var hist = new Float64Array(32768), n = frames.length, langkah = Math.max(1, Math.floor(n / 24));
+  for(var f=0; f<n; f+=langkah){
+    var d = frames[f];
+    for(var i=0; i<d.length; i+=4*5) hist[((d[i]>>3)<<10)|((d[i+1]>>3)<<5)|(d[i+2]>>3)]++;
+  }
+  var items = [];
+  for(var k=0; k<32768; k++) if(hist[k]>0) items.push(k);
+  if(!items.length) items.push(0);
+  function ch(k,c){ return c===0 ? (k>>10)&31 : c===1 ? (k>>5)&31 : k&31; }
+  var kotak = [items];
+  while(kotak.length < 256){
+    var pilih = -1, terbaik = 0, kanal = 0;
+    for(var b=0; b<kotak.length; b++){
+      var it = kotak[b]; if(it.length < 2) continue;
+      for(var c=0; c<3; c++){
+        var mn = 31, mx = 0;
+        for(var q=0; q<it.length; q++){ var v = ch(it[q],c); if(v<mn)mn=v; if(v>mx)mx=v; }
+        var skor = (mx-mn) * Math.sqrt(it.length);
+        if(skor > terbaik){ terbaik = skor; pilih = b; kanal = c; }
+      }
+    }
+    if(pilih < 0) break;
+    var isi = kotak[pilih].slice().sort(function(p,q){ return ch(p,kanal) - ch(q,kanal); });
+    var total = 0; isi.forEach(function(k){ total += hist[k]; });
+    var acc = 0, belah = 1;
+    for(var m=0; m<isi.length-1; m++){ acc += hist[isi[m]]; if(acc >= total/2){ belah = m+1; break; } }
+    kotak.splice(pilih, 1, isi.slice(0,belah), isi.slice(belah));
+  }
+  var palet = new Uint8Array(768), pr = [], pg = [], pb = [];
+  for(var b2=0; b2<256; b2++){
+    var it2 = kotak[b2] || kotak[0], sr=0, sg=0, sb=0, sw=0;
+    it2.forEach(function(k){ var w = hist[k] || 1; sr += ch(k,0)*w; sg += ch(k,1)*w; sb += ch(k,2)*w; sw += w; });
+    var r = Math.round(sr/sw), g = Math.round(sg/sw), bl = Math.round(sb/sw);
+    r = (r<<3)|(r>>2); g = (g<<3)|(g>>2); bl = (bl<<3)|(bl>>2);
+    palet[b2*3] = r; palet[b2*3+1] = g; palet[b2*3+2] = bl; pr.push(r); pg.push(g); pb.push(bl);
+  }
+  var lut = new Uint8Array(32768);
+  for(var key=0; key<32768; key++){
+    var cr = ((key>>10)&31)*8+4, cg = ((key>>5)&31)*8+4, cb = (key&31)*8+4, best = 0, bd = 1e9;
+    for(var e=0; e<256; e++){
+      var dr = cr-pr[e], dg = cg-pg[e], db = cb-pb[e], dd = dr*dr*3 + dg*dg*4 + db*db*2;
+      if(dd < bd){ bd = dd; best = e; }
+    }
+    lut[key] = best;
+  }
+  return { palet: palet, lut: lut };
+}
+// Pemampat LZW format GIF
+function lzwGif(idx, keluar){
+  var BITS = 12, MAKS = 1 << BITS, CLEAR = 256, EOI = 257;
+  var nBits = 9, maxcode = 511, free = 258, bufBits = 0, bufVal = 0, blok = [];
+  function tulis(b){ blok.push(b); if(blok.length === 255){ keluar.push(255); for(var i=0;i<255;i++) keluar.push(blok[i]); blok.length = 0; } }
+  function out(code){
+    bufVal |= code << bufBits; bufBits += nBits;
+    while(bufBits >= 8){ tulis(bufVal & 255); bufVal >>= 8; bufBits -= 8; }
+    if(free > maxcode){ nBits++; maxcode = nBits === BITS ? MAKS : (1 << nBits) - 1; }
+  }
+  var dict = new Map();
+  out(CLEAR);
+  var ent = idx[0];
+  for(var i=1; i<idx.length; i++){
+    var c = idx[i], key = (ent << 8) | c, hit = dict.get(key);
+    if(hit !== undefined){ ent = hit; continue; }
+    out(ent);
+    if(free < MAKS){ dict.set(key, free++); }
+    else {
+      dict.clear(); free = 258;
+      out(CLEAR); nBits = 9; maxcode = 511;
+    }
+    ent = c;
+  }
+  out(ent); out(EOI);
+  if(bufBits > 0) tulis(bufVal & 255);
+  if(blok.length){ keluar.push(blok.length); for(var j=0;j<blok.length;j++) keluar.push(blok[j]); }
+  keluar.push(0);
+}
+function buatGif(frames, w, h, delayCs, onProgress, batal){
+  var info = bangunPalet(frames), lut = info.lut, out = [];
+  function p16(v){ out.push(v & 255, (v >> 8) & 255); }
+  "GIF89a".split("").forEach(function(c){ out.push(c.charCodeAt(0)); });
+  p16(w); p16(h); out.push(0xF7, 0, 0);
+  for(var i=0;i<768;i++) out.push(info.palet[i]);
+  out.push(0x21,0xFF,0x0B); "NETSCAPE2.0".split("").forEach(function(c){ out.push(c.charCodeAt(0)); });
+  out.push(3,1,0,0,0);
+  return new Promise(function(res){
+    var f = 0, idx = new Uint8Array(w*h);
+    (function langkah(){
+      if(batal()){ res(null); return; }
+      if(f >= frames.length){ out.push(0x3B); res(new Blob([new Uint8Array(out)], {type:"image/gif"})); return; }
+      var d = frames[f];
+      for(var p=0, q=0; p<idx.length; p++, q+=4) idx[p] = lut[((d[q]>>3)<<10)|((d[q+1]>>3)<<5)|(d[q+2]>>3)];
+      out.push(0x21,0xF9,4,0x04); p16(delayCs); out.push(0,0);
+      out.push(0x2C); p16(0); p16(0); p16(w); p16(h); out.push(0, 8);
+      lzwGif(idx, out);
+      f++; onProgress(f / frames.length);
+      setTimeout(langkah, 0);
+    })();
+  });
+}
+function mulaiGif(){
+  var my = ++gifToken, frames = rekam.frames;
+  if(gifUrl){ URL.revokeObjectURL(gifUrl); gifUrl = null; } gifBlob = null;
+  $("gif-img").hidden = true; $("btn-gif").disabled = true;
+  if(!frames || frames.length < 4){ $("gif-box").hidden = true; return; }   // mis. dari galeri: tidak ada proses kamera
+  $("gif-box").hidden = false; $("gif-status").textContent = "Menyiapkan GIF proses berfotomu... 0%";
+  var delay = Math.max(2, Math.round(rekam.interval / 10));
+  buatGif(frames, rekam.w, rekam.h, delay, function(pr){
+    if(my === gifToken) $("gif-status").textContent = "Menyiapkan GIF proses berfotomu... " + Math.round(pr*100) + "%";
+  }, function(){ return my !== gifToken; }).then(function(blob){
+    if(!blob || my !== gifToken) return;
+    gifBlob = blob; gifUrl = URL.createObjectURL(blob);
+    $("gif-img").src = gifUrl; $("gif-img").hidden = false; $("btn-gif").disabled = false;
+    $("gif-status").textContent = "GIF proses berfotomu sudah siap (" + (blob.size/1048576).toFixed(1).replace(".",",") + " MB).";
+    rekam.frames = [];
+  }).catch(function(){
+    if(my === gifToken){ $("gif-status").textContent = "GIF tidak bisa dibuat kali ini. Foto stripmu tetap bisa disimpan."; }
+  });
+}
 
 // ====== TOMBOL ======
 $("btn-mulai").addEventListener("click", mulaiSesi);
 $("btn-jepret").addEventListener("click", jepretBerurutan);
-$("btn-batal-kamera").addEventListener("click", function(){ token++; hentikanKamera(); tampil("s-pilih"); });
+$("btn-batal-kamera").addEventListener("click", function(){ token++; sedangJepret = false; stopRekam(); hentikanKamera(); tampil("s-pilih"); });
 $("btn-unduh").addEventListener("click", unduh);
-$("btn-ulang").addEventListener("click", function(){ batalIg(); mulaiSesi(); });
-$("btn-ig").addEventListener("click", function(){ batalIg(); bukaIg(); });
-$("btn-ig-batal").addEventListener("click", function(){ batalIg(); $("ig-box").hidden = true; });
+$("btn-ulang").addEventListener("click", function(){ gifToken++; $("modal-ig").hidden = true; mulaiSesi(); });
+$("btn-gif").addEventListener("click", unduhGif);
+$("btn-modal-tutup").addEventListener("click", tutupModalIg);
+$("modal-ig").addEventListener("click", function(e){ if(e.target === $("modal-ig")) tutupModalIg(); });
+document.addEventListener("keydown", function(e){ if(e.key === "Escape" && !$("modal-ig").hidden) tutupModalIg(); });
+$("btn-ig-modal").addEventListener("click", function(){ setTimeout(tutupModalIg, 300); });
 $("btn-coba-lagi").addEventListener("click", mulaiSesi);
 $("pilih-kamera").addEventListener("change", function(e){ if(!sedangJepret) bukaKamera(e.target.value, true); });
 $("file-galeri").addEventListener("change", function(e){ dariGaleri(e.target.files); e.target.value = ""; });
@@ -430,7 +670,7 @@ document.addEventListener("visibilitychange", function(){
   else if(!$("s-kamera").hidden && !stream && !sedangJepret){ bukaKamera(kameraId, true); }
 });
 
-muatConfig().then(gambarFrame);
+muatConfig().then(function(){ mulaiHitung(); if(sudahBerakhir()) tampil("s-pilih"); else gambarFrame(); });
 })();
 </script>
 </body>

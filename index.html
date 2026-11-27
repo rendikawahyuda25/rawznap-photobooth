@@ -288,7 +288,7 @@ var MIN_PROSES = 4200;          // lama minimal animasi cetak (ms)
 
 var $ = function(id){ return document.getElementById(id); };
 var config = { instagram: IG_DEFAULT, frames: [], counter: "" };
-var frameDipilih = null, frameImg = null, slots = [], skala = 2, fW = 600, fH = 1800;
+var frameDipilih = null, frameImg = null, slots = [], putar = null, skala = 2, fW = 600, fH = 1800;
 var stream = null, foto = [], sedangJepret = false, cerminAktif = true, kameraId = null, kameraSiap = false;
 var mode = "kamera", uploadFiles = [], uploadUrls = [];
 var hasilBlob = null, hasilUrl = null, gifBlob = null, gifUrl = null, token = 0, pilihToken = 0, gifToken = 0, prosesToken = 0, prosesTimer = null;
@@ -413,7 +413,9 @@ function pilihFrame(i){
     try { js = Array.isArray(frameDipilih.slots) && frameDipilih.slots.length ? frameDipilih.slots : deteksiJendela(im); }
     catch(e){ js = []; }
     if(!js.length){ $("info-frame").textContent = "Frame ini belum punya area foto. Pilih frame lain."; return; }
-    frameImg = im; slots = js; fW = im.naturalWidth; fH = im.naturalHeight; skala = LEBAR_HASIL / fW;
+    frameImg = im; slots = js;
+    putar = /^(kiri|ccw)$/i.test(frameDipilih.putar || "") ? "kiri" : /^(kanan|cw)$/i.test(frameDipilih.putar || "") ? "kanan" : null;
+    fW = im.naturalWidth; fH = im.naturalHeight; skala = LEBAR_HASIL / fW;
     $("info-frame").textContent = "(" + slots.length + " foto)";
     if(uploadFiles.length !== slots.length) bersihkanUpload();
     siapkanLayarKamera(); gambarSlotUpload(); perbaruiTombol();
@@ -495,18 +497,20 @@ function deteksiJendela(img){
   var vis = new Uint8Array(W*H), stack = new Int32Array(W*H), out = [], PAD = 3;
   for(var s0=0; s0<W*H; s0++){
     if(vis[s0] || d[s0*4+3] >= 16) continue;
-    var sp = 0, minx = W, miny = H, maxx = 0, maxy = 0, area = 0, sentuh = false;
+    var sp = 0, minx = W, miny = H, maxx = 0, maxy = 0, area = 0;
     stack[sp++] = s0; vis[s0] = 1;
     while(sp){
       var p = stack[--sp], px = p % W, py = (p - px) / W; area++;
       if(px<minx)minx=px; if(px>maxx)maxx=px; if(py<miny)miny=py; if(py>maxy)maxy=py;
-      if(px===0||py===0||px===W-1||py===H-1) sentuh = true;
       if(px>0 && !vis[p-1] && d[(p-1)*4+3]<16){ vis[p-1]=1; stack[sp++]=p-1; }
       if(px<W-1 && !vis[p+1] && d[(p+1)*4+3]<16){ vis[p+1]=1; stack[sp++]=p+1; }
       if(py>0 && !vis[p-W] && d[(p-W)*4+3]<16){ vis[p-W]=1; stack[sp++]=p-W; }
       if(py<H-1 && !vis[p+W] && d[(p+W)*4+3]<16){ vis[p+W]=1; stack[sp++]=p+W; }
     }
-    if(area >= W*H*0.01 && !sentuh){
+    // area yang menyentuh 2 sisi gambar atau lebih dianggap latar luar, bukan tempat foto
+    // (area foto yang menempel di satu sisi saja, misalnya di dasar strip, tetap dipakai)
+    var sisi = (minx===0) + (miny===0) + (maxx===W-1) + (maxy===H-1);
+    if(area >= W*H*0.01 && sisi < 2){
       var x0 = Math.max(0,minx-PAD), y0 = Math.max(0,miny-PAD);
       var x1 = Math.min(W,maxx+1+PAD), y1 = Math.min(H,maxy+1+PAD);
       out.push([x0,y0,x1-x0,y1-y0]);
@@ -589,8 +593,8 @@ function bukaKamera(deviceId, sudahCoba){
 }
 function siapkanLayarKamera(){
   if(!slots.length) return;
-  var sl = slots[0];
-  $("cam").style.aspectRatio = sl[2] + " / " + sl[3];
+  var uk = ukuranFoto(0);
+  $("cam").style.aspectRatio = uk[0] + " / " + uk[1];
   resetProgresFoto();
 }
 function resetProgresFoto(){
@@ -615,9 +619,22 @@ function gambarCover(ctx, src, sw, sh, w, h, cermin){
   ctx.drawImage(src, dx, dy, dw, dh);
   ctx.restore();
 }
+// ====== FRAME MIRING ======
+// "putar" di frames.json: "kiri" = atas foto menghadap ke kiri, "kanan" = atas foto menghadap ke kanan.
+// Foto disimpan tegak (sesuai kamera); baru diputar saat ditempel ke frame.
+function ukuranFoto(i){
+  var sl = slots[i];
+  return putar ? [sl[3], sl[2]] : [sl[2], sl[3]];
+}
+// Siapkan ctx supaya gambar tegak berukuran bw x bh jatuh tepat di kotak slot (x,y,sw,sh). Kembalikan [bw,bh].
+function arahkanKeSlot(ctx, x, y, sw, sh){
+  if(putar === "kiri"){ ctx.translate(x, y + sh); ctx.rotate(-Math.PI/2); return [sh, sw]; }
+  if(putar === "kanan"){ ctx.translate(x + sw, y); ctx.rotate(Math.PI/2); return [sh, sw]; }
+  ctx.translate(x, y); return [sw, sh];
+}
 function kanvasSlot(i){
-  var sl = slots[i], c = document.createElement("canvas");
-  c.width = Math.round(sl[2]*skala); c.height = Math.round(sl[3]*skala);
+  var uk = ukuranFoto(i), c = document.createElement("canvas");
+  c.width = Math.round(uk[0]*skala); c.height = Math.round(uk[1]*skala);
   return c;
 }
 function ambilFrameVideo(i){
@@ -710,7 +727,10 @@ function komposisiStrip(selesai){
   ctx.fillStyle = "#fff"; ctx.fillRect(0,0,c.width,c.height);
   for(var i=0;i<slots.length;i++){
     var s = slots[i], f = fotoDenganFilter(foto[i], filterAktif);
-    ctx.drawImage(f, Math.round(s[0]*skala), Math.round(s[1]*skala), f.width, f.height);
+    ctx.save();
+    var b = arahkanKeSlot(ctx, Math.round(s[0]*skala), Math.round(s[1]*skala), Math.round(s[2]*skala), Math.round(s[3]*skala));
+    ctx.drawImage(f, 0, 0, b[0], b[1]);
+    ctx.restore();
   }
   ctx.drawImage(frameImg, 0, 0, c.width, c.height);
   c.toBlob(selesai, "image/png");
@@ -829,8 +849,8 @@ function mulaiProses(){
 // ====== REKAM PROSES BERFOTO -> GIF ======
 function mulaiRekam(){
   stopRekam(); rekam.frames = []; rekam.titik = []; klipSimpan = null;
-  var sl = slots[0], gs = GIF_LEBAR / fW;
-  rekam.w = Math.max(2, Math.round(sl[2]*gs)); rekam.h = Math.max(2, Math.round(sl[3]*gs));
+  var uk = ukuranFoto(0), gs = GIF_LEBAR / fW;
+  rekam.w = Math.max(2, Math.round(uk[0]*gs)); rekam.h = Math.max(2, Math.round(uk[1]*gs));
   var durasi = slots.length * (HITUNG_MUNDUR + 0.7) * 1000;
   rekam.interval = Math.max(125, Math.round(durasi / 150));      // paling banyak ~150 gambar
   var c = document.createElement("canvas"); c.width = rekam.w; c.height = rekam.h;
@@ -948,8 +968,9 @@ function buatGifStrip(klip, delayCs, onProgress, batal){
       var sl = slots[i], x = Math.round(sl[0]*gs), y = Math.round(sl[1]*gs), sw = Math.round(sl[2]*gs), sh = Math.round(sl[3]*gs);
       tctx.putImageData(klip[i][k].d, 0, 0);
       if(filterAktif !== "natural"){ var fi = tctx.getImageData(0,0,rekam.w,rekam.h); filterPiksel(fi.data, filterAktif); tctx.putImageData(fi, 0, 0); }
-      ctx.save(); ctx.beginPath(); ctx.rect(x,y,sw,sh); ctx.clip(); ctx.translate(x,y);
-      gambarCover(ctx, tmp, rekam.w, rekam.h, sw, sh, false);
+      ctx.save(); ctx.beginPath(); ctx.rect(x,y,sw,sh); ctx.clip();
+      var bb = arahkanKeSlot(ctx, x, y, sw, sh);
+      gambarCover(ctx, tmp, rekam.w, rekam.h, bb[0], bb[1], false);
       ctx.restore();
     }
     ctx.drawImage(frameImg, 0, 0, w, h);
@@ -1025,8 +1046,8 @@ function mulaiGif(onProg, selesai, ulang){
   else { $("gif-img").removeAttribute("src"); $("gif-kartu").hidden = true; $("gif-status").hidden = true; $("gif-img").style.opacity = ""; }
   var klip = null;
   if(mode === "upload"){
-    var gs = GIF_LEBAR / fW, sl = slots[0];
-    rekam.w = Math.max(2, Math.round(sl[2]*gs)); rekam.h = Math.max(2, Math.round(sl[3]*gs)); rekam.interval = 170;
+    var gs = GIF_LEBAR / fW, uk = ukuranFoto(0);
+    rekam.w = Math.max(2, Math.round(uk[0]*gs)); rekam.h = Math.max(2, Math.round(uk[1]*gs)); rekam.interval = 170;
     try { klip = klipUpload(); } catch(e){ klip = null; }
   } else {
     klip = klipSimpan || ((rekam.frames && rekam.frames.length && rekam.titik.length === slots.length) ? potongKlip() : null);

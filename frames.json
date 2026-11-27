@@ -28,6 +28,34 @@
       "nama": "Kucing Natal",
       "file": "frames/5_xmas.webp",
       "kecil": "frames/5_xmas-kecil.webp"
+    },
+    {
+      "nama": "Holiday",
+      "file": "frames/6_xmas.webp",
+      "kecil": "frames/6_xmas-kecil.webp"
+    },
+    {
+      "nama": "Christmas Season",
+      "file": "frames/7_xmas.webp",
+      "kecil": "frames/7_xmas-kecil.webp",
+      "putar": "kiri"
+    },
+    {
+      "nama": "Once Upon A Time",
+      "file": "frames/8_xmas.webp",
+      "kecil": "frames/8_xmas-kecil.webp",
+      "putar": "kanan"
+    },
+    {
+      "nama": "Christmas Edition",
+      "file": "frames/9_xmas.webp",
+      "kecil": "frames/9_xmas-kecil.webp",
+      "putar": "kanan"
+    },
+    {
+      "nama": "Special Edition",
+      "file": "frames/10_xmas.webp",
+      "kecil": "frames/10_xmas-kecil.webp"
     }
   ]
 }

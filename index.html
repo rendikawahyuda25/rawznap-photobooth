@@ -44,6 +44,7 @@ p{margin:0;line-height:1.5}
 .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
 .flash.on{animation:fl .35s ease-out}
 @keyframes fl{0%{opacity:.95}100%{opacity:0}}
+.sosial{text-align:center;margin:0 0 12px;padding:8px 14px;border-radius:999px;background:#e8c87222;border:1px solid #e8c87255;color:#f3dca0;font-weight:600;font-size:14px}
 .hitung{background:#ffffff14;border:1px solid #ffffff22;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
 .hitung p{margin:0;font-size:.9rem;color:#cfe0d6}
 .hitung b{color:var(--snow)}
@@ -77,6 +78,8 @@ footer{margin-top:4px;text-align:center;font-size:.8rem;color:#9fb8aa}
   <header>
     <h1><small>@rawznap.box</small><span id="judul">Photobooth Natal</span></h1>
   </header>
+
+  <p class="sosial" id="sosial" hidden></p>
 
   <div class="hitung" id="hitung" role="group" aria-label="Sisa waktu program Natal" hidden>
     <p>Program Natal berlaku sampai <b id="batas-teks">31 Desember 2026, 23.59.59 WIB</b></p>
@@ -168,7 +171,7 @@ var IG_DEFAULT = "https://www.instagram.com/rawznap.box/";
 var MAKS_FOTO = 6;
 
 var $ = function(id){ return document.getElementById(id); };
-var config = { instagram: IG_DEFAULT, frames: [] };
+var config = { instagram: IG_DEFAULT, frames: [], counter: "" };
 var frameDipilih = null, frameImg = null, slots = [], skala = 2, fW = 600, fH = 1800;
 var stream = null, foto = [], sedangJepret = false, cerminAktif = true, kameraId = null;
 var hasilBlob = null, hasilUrl = null, gifBlob = null, gifUrl = null, token = 0, pilihToken = 0, gifToken = 0;
@@ -216,6 +219,28 @@ function tampil(id){
   window.scrollTo(0,0);
 }
 
+// ====== PENGHITUNG PENGGUNA (opsional; kalau gagal, website tetap jalan normal) ======
+function hit(e, f){
+  if(!config.counter) return;
+  try{
+    fetch(config.counter + "/hit?e=" + e + (f ? "&f=" + encodeURIComponent(f) : ""), {method:"POST", keepalive:true, mode:"cors"}).catch(function(){});
+  }catch(x){}
+}
+function mulaiCounter(){
+  if(!config.counter) return;
+  var sudah = false;
+  try{ sudah = sessionStorage.getItem("rz_kunj") === "1"; sessionStorage.setItem("rz_kunj","1"); }catch(x){}
+  if(!sudah) hit("kunjungan");
+  try{
+    fetch(config.counter + "/publik", {mode:"cors"}).then(function(r){ return r.json(); }).then(function(d){
+      if(d && d.tampil === true && isFinite(d.jumlah) && d.jumlah >= 1000){
+        $("sosial").textContent = "\uD83C\uDF84 " + Number(d.jumlah).toLocaleString("id-ID") + " orang sudah berfoto di sini";
+        $("sosial").hidden = false;
+      }
+    }).catch(function(){});
+  }catch(x){}
+}
+
 // ====== MUAT DAFTAR FRAME ======
 function muatConfig(){
   return fetch("frames.json",{cache:"no-cache"}).then(function(r){
@@ -230,6 +255,8 @@ function muatConfig(){
     $("ig-selesai").href = (j && j.instagram) || IG_DEFAULT; $("btn-ig-modal").href = (j && j.instagram) || IG_DEFAULT;
     if(j && Array.isArray(j.frames)) config.frames = j.frames;
     if(j && j.instagram) config.instagram = j.instagram;
+    if(j && typeof j.counter === "string" && /^https:\/\//.test(j.counter)) config.counter = j.counter.replace(/\/+$/,"");
+    mulaiCounter();
     if(j && j.judul) { $("judul").textContent = j.judul; document.title = j.judul; }
   }).catch(function(){
     $("frames").innerHTML = "";
@@ -479,6 +506,7 @@ function buatHasil(){
     hasilBlob = b; hasilUrl = URL.createObjectURL(b);
     $("hasil-img").src = hasilUrl;
     $("modal-ig").hidden = true;
+    hit("sesi", frameDipilih && frameDipilih.nama);
     tampil("s-hasil");
     mulaiGif();
   }, "image/png");
@@ -491,11 +519,13 @@ function simpanBlob(blob, url, nama){
 function unduh(){
   if(!hasilBlob || !hasilUrl) return;
   simpanBlob(hasilBlob, hasilUrl, "rawznap-natal-" + Date.now() + ".png");
+  hit("unduh_foto");
   bukaModalIg($("btn-unduh"));
 }
 function unduhGif(){
   if(!gifBlob || !gifUrl) return;
   simpanBlob(gifBlob, gifUrl, "rawznap-natal-" + Date.now() + ".gif");
+  hit("unduh_gif");
   bukaModalIg($("btn-gif"));
 }
 
@@ -711,7 +741,7 @@ $("btn-gif").addEventListener("click", unduhGif);
 $("btn-modal-tutup").addEventListener("click", tutupModalIg);
 $("modal-ig").addEventListener("click", function(e){ if(e.target === $("modal-ig")) tutupModalIg(); });
 document.addEventListener("keydown", function(e){ if(e.key === "Escape" && !$("modal-ig").hidden) tutupModalIg(); });
-$("btn-ig-modal").addEventListener("click", function(){ setTimeout(tutupModalIg, 300); });
+$("btn-ig-modal").addEventListener("click", function(){ hit("ig"); setTimeout(tutupModalIg, 300); });
 $("btn-coba-lagi").addEventListener("click", mulaiSesi);
 $("pilih-kamera").addEventListener("change", function(e){ if(!sedangJepret) bukaKamera(e.target.value, true); });
 $("file-galeri").addEventListener("change", function(e){ dariGaleri(e.target.files); e.target.value = ""; });

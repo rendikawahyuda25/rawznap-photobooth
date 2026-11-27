@@ -14,36 +14,28 @@
 html,body{margin:0;min-height:100%}
 body{background:var(--pine2);color:var(--snow);font-family:var(--font);
   background-image:radial-gradient(circle at 20% 10%,#164f3b 0,transparent 45%),radial-gradient(circle at 85% 90%,#5a1620 0,transparent 40%);
+  background-attachment:fixed;
   min-height:100dvh;padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px));
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-main{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+main{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:16px;transition:max-width .2s}
+main.lebar{max-width:1040px}
 h1{font-size:1.6rem;line-height:1.15;margin:8px 0 0;text-wrap:balance}
 h1 small{display:block;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+h2{margin:0;font-size:1.2rem}
 p{margin:0;line-height:1.5}
 .muted{color:#cfe0d6;font-size:.92rem}
-.screen[hidden]{display:none}
 .screen{display:flex;flex-direction:column;gap:14px}
 .btn{appearance:none;border:0;border-radius:14px;padding:15px 18px;font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer;
   background:var(--berry);color:#fff;min-height:52px;width:100%;transition:transform .08s}
 .btn:active{transform:scale(.98)}
-.btn:focus-visible,.frame:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn:focus-visible,.frame:focus-visible,.pilihan:focus-visible,.tautan:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .btn.alt{background:transparent;border:2px solid #ffffff55;color:var(--snow)}
 .btn.gold{background:var(--gold);color:var(--ink)}
+.btn.ok{background:#1f7a52;color:#fff}
 .btn:disabled{opacity:.5;cursor:default}
-.frames{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px}
-.aksi{position:sticky;bottom:0;display:flex;flex-direction:column;gap:6px;padding:10px 0 4px;background:linear-gradient(to top,var(--pine2) 70%,transparent)}
-.aksi .muted{font-size:.82rem;text-align:center}
-.frame{appearance:none;border:3px solid transparent;border-radius:12px;padding:4px;background:#ffffff14;cursor:pointer;color:inherit;font:inherit}
-.frame img{display:block;width:100%;height:auto;aspect-ratio:1/3;border-radius:8px;background:#fff3}
-.frame span{display:block;margin-top:6px;font-size:.82rem;text-align:center}
-.frame[aria-pressed="true"]{border-color:var(--gold);background:#ffd66622}
-.cam{position:relative;width:100%;aspect-ratio:520/390;background:#000;border-radius:16px;overflow:hidden;border:3px solid #ffffff33}
-.cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.cam video.cermin{transform:scaleX(-1)}
-.count{position:absolute;inset:0;display:grid;place-items:center;font-size:7rem;font-weight:800;color:#fff;text-shadow:0 4px 24px #0009;pointer-events:none}
-.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
-.flash.on{animation:fl .35s ease-out}
-@keyframes fl{0%{opacity:.95}100%{opacity:0}}
+a.btn{display:block;text-align:center;text-decoration:none;line-height:22px}
+.tautan{appearance:none;background:none;border:0;color:var(--gold);font:inherit;font-weight:600;cursor:pointer;padding:8px 2px;text-decoration:underline;text-underline-offset:3px}
+.tautan:disabled{opacity:.4;cursor:default}
 .sosial{text-align:center;margin:0 0 12px;padding:8px 14px;border-radius:999px;background:#e8c87222;border:1px solid #e8c87255;color:#f3dca0;font-weight:600;font-size:14px}
 .hitung{background:#ffffff14;border:1px solid #ffffff22;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
 .hitung p{margin:0;font-size:.9rem;color:#cfe0d6}
@@ -53,82 +45,196 @@ p{margin:0;line-height:1.5}
 .kotak strong{display:block;font-size:1.5rem;line-height:1.1;color:var(--gold);font-variant-numeric:tabular-nums}
 .kotak span{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:#cfe0d6}
 .hitung.akhir .kotak strong{color:#ff9a8f}
-.gif{display:block;max-width:200px;width:100%;height:auto;border-radius:10px;margin:0 auto;background:#0006}
-.modal{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:20px;background:#000a}
-.modal-isi{width:100%;max-width:400px;background:var(--pine);border:1px solid #ffffff33;border-radius:18px;padding:22px 18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 60px #000a}
-.modal-isi h2{margin:0;font-size:1.25rem}
-a.btn{display:block;text-align:center;text-decoration:none;line-height:22px}
+
+/* --- halaman awal: dua pilihan --- */
+.pilihan-wadah{display:grid;gap:12px;grid-template-columns:1fr}
+.pilihan{appearance:none;display:flex;align-items:center;gap:14px;text-align:left;font:inherit;color:var(--snow);cursor:pointer;
+  background:#ffffff14;border:2px solid #ffffff33;border-radius:18px;padding:18px 16px;transition:transform .08s,border-color .15s,background .15s}
+.pilihan:hover{border-color:var(--gold);background:#ffffff1f}
+.pilihan:active{transform:scale(.985)}
+.pilihan svg{flex:none;width:44px;height:44px;color:var(--gold)}
+.pilihan strong{display:block;font-size:1.15rem}
+.pilihan span{display:block;font-size:.9rem;color:#cfe0d6;margin-top:2px}
+
+/* --- studio: live kamera kiri, frame kanan --- */
+.bar-atas{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.studio-grid{display:grid;gap:18px;grid-template-columns:minmax(0,1fr);align-items:start}
+.kiri{display:flex;flex-direction:column;gap:12px}
+.kanan{display:flex;flex-direction:column;gap:10px}
+.kanan h2 small{font-weight:500;font-size:.85rem;color:#cfe0d6;margin-left:6px}
+.cam{position:relative;width:100%;aspect-ratio:520/390;background:#000;border-radius:16px;overflow:hidden;border:3px solid #ffffff33}
+.cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cam video.cermin{transform:scaleX(-1)}
+.count{position:absolute;inset:0;display:grid;place-items:center;font-size:7rem;font-weight:800;color:#fff;text-shadow:0 4px 24px #0009;pointer-events:none}
+.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.flash.on{animation:fl .35s ease-out}
+@keyframes fl{0%{opacity:.95}100%{opacity:0}}
+.badge-live{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:6px;background:#000a;border-radius:999px;padding:4px 10px;font-size:.72rem;font-weight:700;letter-spacing:.1em}
+.badge-live i{width:8px;height:8px;border-radius:50%;background:#ff4d4d;animation:kedip 1.2s infinite}
+@keyframes kedip{50%{opacity:.25}}
 .pilih{width:100%;min-height:46px;border-radius:12px;border:2px solid #ffffff44;background:#0b2d22;color:var(--snow);font:inherit;padding:0 12px}
 .dots{display:flex;gap:8px;justify-content:center}
 .dots i{width:14px;height:14px;border-radius:50%;background:#ffffff33}
 .dots i.done{background:var(--gold)}
 .thumbs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .thumbs canvas{width:100%;height:auto;border-radius:6px;background:#0006}
-.result{display:block;width:100%;max-width:300px;height:auto;margin:0 auto;border-radius:6px;box-shadow:0 10px 40px #0008;background:#fff2}
+.upload-slots{display:grid;gap:8px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.upload-slots div{position:relative;aspect-ratio:4/3;border-radius:12px;border:2px dashed #ffffff55;background:#ffffff10;overflow:hidden;display:grid;place-items:center;color:#cfe0d6;font-weight:700;font-size:1.4rem}
+.upload-slots img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pesan{background:#5a1620;border:1px solid #ff8a8a66;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;font-size:.92rem}
+.frames{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px}
+.frames.terkunci{pointer-events:none;opacity:.55}
+.frame{appearance:none;border:3px solid transparent;border-radius:12px;padding:4px;background:#ffffff14;cursor:pointer;color:inherit;font:inherit}
+.frame img{display:block;width:100%;height:auto;aspect-ratio:1/3;border-radius:8px;background:#fff3}
+.frame span{display:block;margin-top:6px;font-size:.82rem;text-align:center}
+.frame[aria-pressed="true"]{border-color:var(--gold);background:#ffd66622}
+
+/* --- layar proses (animasi cetak) --- */
+.proses{align-items:center;text-align:center;padding-top:8px}
+.slot-cetak{position:relative;z-index:2;width:min(300px,80vw);height:28px;border-radius:16px;background:linear-gradient(#2b2b2b,#0b0b0b);box-shadow:0 6px 18px #000a}
+.slot-cetak i{position:absolute;left:14px;right:14px;bottom:7px;height:5px;border-radius:3px;background:#000;box-shadow:inset 0 1px 3px #000, 0 1px 0 #ffffff22}
+.slot-cetak b{position:absolute;right:20px;top:7px;width:8px;height:8px;border-radius:50%;background:#58e08f;animation:kedip .9s infinite}
+.keluar{position:relative;overflow:hidden;width:min(170px,38vw,17vh);margin-top:-6px;border-radius:0 0 6px 6px}
+.keluar img{display:block;width:100%;height:auto;transform:translateY(-100%)}
+.keluar img.jalan{animation:keluar 4s cubic-bezier(.45,.05,.35,1) forwards, cuci 4s ease-out forwards}
+@keyframes keluar{0%{transform:translateY(-100%)}100%{transform:translateY(0)}}
+@keyframes cuci{0%{filter:blur(10px) brightness(2) saturate(0)}60%{filter:blur(3px) brightness(1.25) saturate(.5)}100%{filter:none}}
+.progres{width:min(300px,80vw);height:10px;border-radius:6px;background:#ffffff22;overflow:hidden}
+.progres i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#ff9a8f);transition:width .2s}
+
+/* --- hasil --- */
+.hasil-grid{display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;max-width:640px;width:100%;margin:0 auto}
+.hasil-grid:has(#gif-kartu[hidden]){grid-template-columns:minmax(0,300px);justify-content:center}
+.kartu{display:flex;flex-direction:column;gap:12px;align-items:center;animation:muncul .5s ease-out both}
+.kartu:nth-child(2){animation-delay:.15s}
+@keyframes muncul{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.kartu img{display:block;width:100%;max-width:300px;height:auto;border-radius:6px;box-shadow:0 10px 40px #0008;background:#fff2}
+.kartu .judul-kartu{font-weight:700;color:var(--gold);font-size:.85rem;letter-spacing:.1em;text-transform:uppercase}
+.kartu .btn{max-width:300px;padding:13px 8px;font-size:1rem}
 .box{background:#ffffff14;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .err{background:#5a1620;border:1px solid #ff8a8a66}
-.row{display:flex;gap:10px;flex-wrap:wrap}
-.row .btn{flex:1 1 140px}
+.modal{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:20px;background:#000a}
+.modal-isi{width:100%;max-width:400px;background:var(--pine);border:1px solid #ffffff33;border-radius:18px;padding:22px 18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 60px #000a}
+.modal-isi h2{font-size:1.25rem}
 footer{margin-top:4px;text-align:center;font-size:.8rem;color:#9fb8aa}
-@media (prefers-reduced-motion:reduce){.flash.on{animation:none;opacity:0}.btn{transition:none}}
+
+@media (min-width:860px){
+  .studio-grid{grid-template-columns:minmax(0,5fr) minmax(0,4fr);gap:24px}
+  .kiri{position:sticky;top:12px}
+  .frames{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
+  .pilihan-wadah{grid-template-columns:1fr 1fr}
+  .pilihan{flex-direction:column;text-align:center;padding:28px 18px}
+  .pilihan svg{width:56px;height:56px}
+}
+@media (prefers-reduced-motion:reduce){
+  .flash.on,.badge-live i,.slot-cetak b,.kartu{animation:none}.btn,main{transition:none}
+  .keluar img.jalan{animation:none;transform:none;filter:none}
+}
 </style>
 </head>
 <body>
-<main>
+<main id="utama">
   <header>
     <h1><small>@rawznap.box</small><span id="judul">Photobooth Natal</span></h1>
   </header>
 
-  <p class="sosial" id="sosial" hidden></p>
-
-  <div class="hitung" id="hitung" role="group" aria-label="Sisa waktu program Natal" hidden>
-    <p>Program Natal berlaku sampai <b id="batas-teks">31 Desember 2026, 23.59.59 WIB</b></p>
-    <div class="kotak">
-      <div><strong id="t-hari">0</strong><span>Hari</span></div>
-      <div><strong id="t-jam">00</strong><span>Jam</span></div>
-      <div><strong id="t-menit">00</strong><span>Menit</span></div>
-      <div><strong id="t-detik">00</strong><span>Detik</span></div>
+  <div id="atas">
+    <p class="sosial" id="sosial" hidden></p>
+    <div class="hitung" id="hitung" role="group" aria-label="Sisa waktu program Natal" hidden>
+      <p>Program Natal berlaku sampai <b id="batas-teks">31 Desember 2026, 23.59.59 WIB</b></p>
+      <div class="kotak">
+        <div><strong id="t-hari">0</strong><span>Hari</span></div>
+        <div><strong id="t-jam">00</strong><span>Jam</span></div>
+        <div><strong id="t-menit">00</strong><span>Menit</span></div>
+        <div><strong id="t-detik">00</strong><span>Detik</span></div>
+      </div>
     </div>
   </div>
 
-  <!-- 1. PILIH FRAME -->
-  <section class="screen" id="s-pilih">
-    <p class="muted">Pilih frame Natal favoritmu, lalu ambil fotonya. Hasilnya bisa kamu simpan gratis.</p>
-    <div class="frames" id="frames" role="group" aria-label="Pilihan frame"></div>
-    <div class="aksi">
-      <p class="muted" id="info-frame" aria-live="polite"></p>
-      <button class="btn" id="btn-mulai" disabled>Mulai Foto</button>
+  <!-- 1. AWAL: pilih cara berfoto -->
+  <section class="screen" id="s-awal">
+    <p class="muted">Foto strip bertema Natal, gratis. Mau foto langsung atau pakai foto yang sudah ada?</p>
+    <div class="pilihan-wadah">
+      <button class="pilihan" id="btn-awal-kamera" type="button">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15h8l3-5h14l3 5h8v24H6z"/><circle cx="24" cy="26" r="7"/></svg>
+        <div><strong>Pakai Kamera</strong><span>Foto langsung, 3 jepretan otomatis</span></div>
+      </button>
+      <button class="pilihan" id="btn-awal-upload" type="button">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="8" width="36" height="32" rx="4"/><circle cx="17" cy="20" r="4"/><path d="M6 34l11-10 9 8 6-5 10 9"/></svg>
+        <div><strong>Upload dari Galeri</strong><span>Pakai foto yang sudah ada di HP atau laptop</span></div>
+      </button>
     </div>
-    <p class="muted" id="info-priv">Fotomu diproses di HP kamu sendiri dan tidak dikirim ke mana pun.</p>
+    <p class="muted" id="info-priv">Fotomu diproses di perangkatmu sendiri dan tidak dikirim ke mana pun.</p>
   </section>
 
-  <!-- 2. KAMERA -->
-  <section class="screen" id="s-kamera" hidden>
-    <div class="cam" id="cam">
-      <video id="video" playsinline muted autoplay></video>
-      <div class="count" id="count" aria-live="assertive"></div>
-      <div class="flash" id="flash"></div>
+  <!-- 2. STUDIO: live kamera di kiri, pilihan frame di kanan -->
+  <section class="screen" id="s-studio" hidden>
+    <div class="bar-atas">
+      <button class="tautan" id="btn-kembali-awal" type="button">&larr; Kembali</button>
+      <button class="tautan" id="btn-ganti-mode" type="button">Upload dari galeri</button>
     </div>
-    <select id="pilih-kamera" class="pilih" aria-label="Pilih kamera" hidden></select>
-    <div class="dots" id="dots" aria-hidden="true"></div>
-    <div class="thumbs" id="thumbs"></div>
-    <button class="btn" id="btn-jepret">Mulai Hitung Mundur</button>
-    <button class="btn alt" id="btn-batal-kamera">Kembali</button>
+    <div class="studio-grid">
+      <div class="kiri">
+        <div id="panel-kamera" class="kiri">
+          <div class="cam" id="cam">
+            <video id="video" playsinline muted autoplay></video>
+            <div class="badge-live" aria-hidden="true"><i></i>LIVE</div>
+            <div class="count" id="count" aria-live="assertive"></div>
+            <div class="flash" id="flash"></div>
+          </div>
+          <select id="pilih-kamera" class="pilih" aria-label="Pilih kamera" hidden></select>
+          <div class="dots" id="dots" aria-hidden="true"></div>
+          <div class="thumbs" id="thumbs"></div>
+        </div>
+        <div id="panel-upload" class="kiri" hidden>
+          <div class="upload-slots" id="slot-prev"></div>
+          <label class="btn alt" for="file-galeri" id="lbl-galeri" style="display:block;text-align:center">Pilih foto dari galeri</label>
+          <input type="file" id="file-galeri" accept="image/*" multiple hidden>
+          <p class="muted" id="info-upload"></p>
+        </div>
+        <div class="pesan" id="pesan-studio" hidden>
+          <p id="pesan-teks"></p>
+          <button class="btn alt" id="btn-coba-lagi" type="button" style="min-height:44px;padding:10px">Coba kamera lagi</button>
+        </div>
+        <button class="btn" id="btn-mulai" disabled>Mulai Foto</button>
+      </div>
+      <div class="kanan">
+        <h2>Pilih frame <small id="info-frame" aria-live="polite"></small></h2>
+        <div class="frames" id="frames" role="group" aria-label="Pilihan frame"></div>
+      </div>
+    </div>
   </section>
 
-  <!-- 3. HASIL -->
+  <!-- 3. PROSES: animasi cetak -->
+  <section class="screen proses" id="s-proses" hidden>
+    <h2>Fotomu lagi dicetak...</h2>
+    <div class="slot-cetak" aria-hidden="true"><i></i><b></b></div>
+    <div class="keluar" id="keluar"><img id="proses-img" alt=""></div>
+    <p class="muted" id="proses-teks" aria-live="polite">Menyiapkan hasil fotomu...</p>
+    <div class="progres" aria-hidden="true"><i id="proses-bar"></i></div>
+  </section>
+
+  <!-- 4. HASIL -->
   <section class="screen" id="s-hasil" hidden>
-    <img class="result" id="hasil-img" alt="Hasil foto strip kamu">
-    <div class="row">
-      <button class="btn gold" id="btn-unduh">Simpan Foto</button>
-      <button class="btn alt" id="btn-ulang">Foto Lagi</button>
+    <div>
+      <h2>Hasil fotomu sudah jadi</h2>
+      <p class="muted" id="hint-unduh">Simpan foto dan GIF-nya di bawah ini.</p>
     </div>
+    <div class="hasil-grid">
+      <div class="kartu">
+        <span class="judul-kartu">Foto</span>
+        <img id="hasil-img" alt="Hasil foto strip kamu">
+        <button class="btn gold" id="btn-unduh" type="button">Unduh Foto</button>
+      </div>
+      <div class="kartu" id="gif-kartu" hidden>
+        <span class="judul-kartu">GIF</span>
+        <img id="gif-img" alt="GIF strip animasi dengan frame">
+        <button class="btn gold" id="btn-gif" type="button" disabled>Unduh GIF</button>
+      </div>
+    </div>
+    <p class="muted" id="catatan-hasil" hidden></p>
     <p class="muted" id="hint-ios">Kalau foto tidak otomatis tersimpan, tahan lama pada gambar lalu pilih Simpan.</p>
-    <div class="box" id="gif-box" hidden>
-      <p id="gif-status" class="muted" aria-live="polite"></p>
-      <img class="gif" id="gif-img" alt="GIF strip animasi dengan frame" hidden>
-      <button class="btn alt" id="btn-gif" disabled>Simpan GIF</button>
-    </div>
+    <button class="btn alt" id="btn-ulang" type="button">Foto Lagi</button>
   </section>
 
   <!-- PROGRAM SELESAI -->
@@ -137,15 +243,13 @@ footer{margin-top:4px;text-align:center;font-size:.8rem;color:#9fb8aa}
       <p><b>Program Natal RAWZNAP sudah berakhir.</b></p>
       <p class="muted">Terima kasih sudah ikut berfoto. Sampai jumpa di program berikutnya, ikuti kami di Instagram supaya tidak ketinggalan.</p>
     </div>
-    <a class="btn gold" id="ig-selesai" href="https://www.instagram.com/rawznap.box/" style="display:block;text-align:center;text-decoration:none;line-height:22px">Ikuti @rawznap.box</a>
+    <a class="btn gold" id="ig-selesai" href="https://www.instagram.com/rawznap.box/">Ikuti @rawznap.box</a>
   </section>
 
   <!-- PESAN ERROR -->
   <section class="screen" id="s-error" hidden>
     <div class="box err"><p id="err-teks"></p></div>
-    <label class="btn gold" id="lbl-galeri" style="display:block;text-align:center" for="file-galeri">Pilih Foto dari Galeri</label>
-    <input type="file" id="file-galeri" accept="image/*" multiple hidden>
-    <button class="btn alt" id="btn-coba-lagi">Coba Kamera Lagi</button>
+    <button class="btn alt" id="btn-error-kembali" type="button">Kembali</button>
   </section>
 
   <div class="modal" id="modal-ig" role="dialog" aria-modal="true" aria-labelledby="modal-judul" hidden>
@@ -169,12 +273,15 @@ var LEBAR_HASIL   = 1200;       // lebar gambar akhir (px)
 var BERAKHIR_DEFAULT = "2026-12-31T23:59:59+07:00";   // batas program (bisa diganti lewat frames.json)
 var IG_DEFAULT = "https://www.instagram.com/rawznap.box/";
 var MAKS_FOTO = 6;
+var MIN_PROSES = 4200;          // lama minimal animasi cetak (ms)
 
 var $ = function(id){ return document.getElementById(id); };
 var config = { instagram: IG_DEFAULT, frames: [], counter: "" };
 var frameDipilih = null, frameImg = null, slots = [], skala = 2, fW = 600, fH = 1800;
-var stream = null, foto = [], sedangJepret = false, cerminAktif = true, kameraId = null;
-var hasilBlob = null, hasilUrl = null, gifBlob = null, gifUrl = null, token = 0, pilihToken = 0, gifToken = 0;
+var stream = null, foto = [], sedangJepret = false, cerminAktif = true, kameraId = null, kameraSiap = false;
+var mode = "kamera", uploadFiles = [], uploadUrls = [];
+var hasilBlob = null, hasilUrl = null, gifBlob = null, gifUrl = null, token = 0, pilihToken = 0, gifToken = 0, prosesToken = 0, prosesTimer = null;
+var sudahFoto = false, sudahGif = false;
 var rekam = { timer:null, frames:[], titik:[], w:320, h:240, interval:125 };
 var GIF_LEBAR = 360;   // lebar GIF strip (px); makin besar makin tajam tapi makin berat
 var akhirMs = Date.parse(BERAKHIR_DEFAULT), offsetWaktu = 0, hitungTimer = null;
@@ -196,7 +303,7 @@ function perbaruiHitung(){
   if(sisa <= 0){
     $("hitung").hidden = true;
     if(hitungTimer){ clearInterval(hitungTimer); hitungTimer = null; }
-    if(!$("s-pilih").hidden) tampil("s-pilih");   // alihkan ke layar selesai
+    if(!$("s-awal").hidden) tampil("s-awal");   // alihkan ke layar selesai
     return;
   }
   var d = Math.floor(sisa / 86400000), j = Math.floor(sisa / 3600000) % 24,
@@ -214,8 +321,10 @@ function mulaiHitung(){
 }
 
 function tampil(id){
-  if(id === "s-pilih" && sudahBerakhir()){ id = "s-selesai"; $("hitung").hidden = true; }
-  ["s-pilih","s-kamera","s-hasil","s-error","s-selesai"].forEach(function(s){ $(s).hidden = (s !== id); });
+  if(id === "s-awal" && sudahBerakhir()){ id = "s-selesai"; $("hitung").hidden = true; }
+  ["s-awal","s-studio","s-proses","s-hasil","s-error","s-selesai"].forEach(function(s){ $(s).hidden = (s !== id); });
+  $("atas").hidden = (id !== "s-awal");
+  $("utama").classList.toggle("lebar", id === "s-studio" || id === "s-hasil");
   window.scrollTo(0,0);
 }
 
@@ -277,6 +386,94 @@ function gambarFrame(){
   if(config.frames.length) pilihFrame(0);
 }
 
+function pilihFrame(i){
+  frameDipilih = config.frames[i];
+  var my = ++pilihToken;
+  var kids = $("frames").children;
+  for(var k=0;k<kids.length;k++) kids[k].setAttribute("aria-pressed", k===i ? "true":"false");
+  frameImg = null; slots = [];
+  perbaruiTombol();
+  $("info-frame").textContent = "Memuat...";
+  var im = new Image();
+  im.onload = function(){
+    if(my !== pilihToken) return;
+    var js;
+    try { js = Array.isArray(frameDipilih.slots) && frameDipilih.slots.length ? frameDipilih.slots : deteksiJendela(im); }
+    catch(e){ js = []; }
+    if(!js.length){ $("info-frame").textContent = "Frame ini belum punya area foto. Pilih frame lain."; return; }
+    frameImg = im; slots = js; fW = im.naturalWidth; fH = im.naturalHeight; skala = LEBAR_HASIL / fW;
+    $("info-frame").textContent = "(" + slots.length + " foto)";
+    if(uploadFiles.length !== slots.length) bersihkanUpload();
+    siapkanLayarKamera(); gambarSlotUpload(); perbaruiTombol();
+  };
+  im.onerror = function(){ if(my === pilihToken) $("info-frame").textContent = "Frame ini gagal dimuat. Coba pilih frame lain."; };
+  im.src = frameDipilih.file;
+}
+
+// ====== STUDIO: tombol utama & mode ======
+function perbaruiTombol(){
+  var b = $("btn-mulai"), siap = !!(frameImg && slots.length);
+  if(mode === "kamera"){
+    b.textContent = sedangJepret ? ("Foto " + Math.min(foto.length + 1, slots.length || 1) + " dari " + (slots.length || 1)) : "Mulai Foto";
+    b.disabled = sedangJepret || !(siap && kameraSiap);
+  } else {
+    b.textContent = "Buat Foto";
+    b.disabled = !(siap && uploadFiles.length === slots.length);
+  }
+  $("frames").classList.toggle("terkunci", sedangJepret);
+  $("btn-ganti-mode").disabled = sedangJepret;
+  $("pilih-kamera").disabled = sedangJepret;
+  $("btn-ganti-mode").textContent = mode === "kamera" ? "Upload dari galeri" : "Pakai kamera";
+}
+function pesanStudio(teks, tombolKamera){
+  $("pesan-studio").hidden = !teks;
+  $("pesan-teks").textContent = teks || "";
+  $("btn-coba-lagi").hidden = !tombolKamera;
+}
+function setMode(m, pesan){
+  mode = m;
+  $("panel-kamera").hidden = (m !== "kamera");
+  $("panel-upload").hidden = (m !== "upload");
+  pesanStudio(pesan || "", !!pesan);
+  if(m === "kamera"){ bukaKamera(kameraId, false); }
+  else { hentikanKamera(); gambarSlotUpload(); }
+  perbaruiTombol();
+}
+function kameraGagal(pesan){
+  hentikanKamera();
+  setMode("upload", pesan);
+}
+function bersihkanUpload(){
+  uploadUrls.forEach(function(u){ URL.revokeObjectURL(u); });
+  uploadUrls = []; uploadFiles = [];
+}
+function gambarSlotUpload(){
+  var w = $("slot-prev"); w.innerHTML = "";
+  var n = slots.length || 3;
+  w.style.gridTemplateColumns = "repeat(" + Math.min(n, 4) + ",minmax(0,1fr))";
+  for(var i=0;i<n;i++){
+    var d = document.createElement("div");
+    if(uploadUrls[i]){ var im = new Image(); im.src = uploadUrls[i]; im.alt = "Foto " + (i+1); d.appendChild(im); }
+    else d.textContent = String(i+1);
+    w.appendChild(d);
+  }
+  $("info-upload").textContent = uploadFiles.length === n
+    ? "Foto sudah dipilih. Tekan Buat Foto, atau pilih ulang."
+    : "Pilih tepat " + n + " foto dari galeri (urutan sesuai nomor).";
+}
+function pilihFileGaleri(files){
+  files = Array.prototype.slice.call(files || []);
+  var n = slots.length;
+  if(!n){ $("info-upload").textContent = "Tunggu frame selesai dimuat, lalu pilih fotonya."; return; }
+  if(files.length !== n){
+    $("info-upload").textContent = "Frame ini butuh tepat " + n + " foto. Kamu memilih " + files.length + ". Pilih lagi.";
+    return;
+  }
+  bersihkanUpload();
+  uploadFiles = files; uploadUrls = files.map(function(f){ return URL.createObjectURL(f); });
+  gambarSlotUpload(); perbaruiTombol();
+}
+
 // Cari area transparan (tempat foto) di dalam gambar frame, urut dari atas ke bawah
 function deteksiJendela(img){
   var W = img.naturalWidth, H = img.naturalHeight;
@@ -310,38 +507,16 @@ function deteksiJendela(img){
   return out.slice(0, MAKS_FOTO);
 }
 
-function pilihFrame(i){
-  frameDipilih = config.frames[i];
-  var my = ++pilihToken;
-  var kids = $("frames").children;
-  for(var k=0;k<kids.length;k++) kids[k].setAttribute("aria-pressed", k===i ? "true":"false");
-  $("btn-mulai").disabled = true; frameImg = null; slots = [];
-  $("info-frame").textContent = "Memuat frame...";
-  var im = new Image();
-  im.onload = function(){
-    if(my !== pilihToken) return;
-    var js;
-    try { js = Array.isArray(frameDipilih.slots) && frameDipilih.slots.length ? frameDipilih.slots : deteksiJendela(im); }
-    catch(e){ js = []; }
-    if(!js.length){ $("info-frame").textContent = "Frame ini belum punya area foto transparan. Pilih frame lain."; return; }
-    frameImg = im; slots = js; fW = im.naturalWidth; fH = im.naturalHeight; skala = LEBAR_HASIL / fW;
-    $("info-frame").textContent = "Frame ini berisi " + slots.length + " foto.";
-    $("btn-mulai").disabled = false;
-  };
-  im.onerror = function(){ if(my === pilihToken) $("info-frame").textContent = "Frame ini gagal dimuat. Coba pilih frame lain."; };
-  im.src = frameDipilih.file;
-}
-
 // ====== KAMERA ======
 function hentikanKamera(){
   if(!sedangJepret) stopRekam();
   if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; }
-  $("video").srcObject = null;
+  $("video").srcObject = null; kameraSiap = false;
+  if(typeof perbaruiTombol === "function") perbaruiTombol();
 }
-function error(pesan, bolehGaleri){
-  stopRekam(); hentikanKamera();
+function error(pesan){
+  stopRekam(); hentikanKamera(); sedangJepret = false; token++;
   $("err-teks").textContent = pesan;
-  $("lbl-galeri").style.display = bolehGaleri === false ? "none" : "block";
   tampil("s-error");
 }
 function labelKamera(t){ return (t && t.label) || ""; }
@@ -366,13 +541,14 @@ function isiDaftarKamera(aktifId){
 }
 function bukaKamera(deviceId, sudahCoba){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    error("Browser ini belum bisa membuka kamera. Buka lewat Chrome atau Safari, atau pilih foto dari galeri.");
+    kameraGagal("Browser ini belum bisa membuka kamera. Buka lewat Chrome atau Safari, atau pilih foto dari galeri di bawah.");
     return Promise.resolve(false);
   }
   hentikanKamera();
   var video = { width:{ideal:1280}, height:{ideal:960} };
   if(deviceId) video.deviceId = { exact: deviceId }; else video.facingMode = "user";
   return navigator.mediaDevices.getUserMedia({ video: video, audio:false }).then(function(s){
+    if(mode !== "kamera" || $("s-studio").hidden){ s.getTracks().forEach(function(t){ t.stop(); }); return false; }   // pengguna sudah pindah layar
     stream = s;
     var track = s.getVideoTracks()[0];
     var aktifId = (track && track.getSettings && track.getSettings().deviceId) || deviceId || null;
@@ -385,37 +561,39 @@ function bukaKamera(deviceId, sudahCoba){
         if(lain && lain.deviceId !== aktifId) return bukaKamera(lain.deviceId, true);
       }
       kameraId = aktifId;
-      return v.play().catch(function(){}).then(function(){ return true; });
+      return v.play().catch(function(){}).then(function(){ kameraSiap = true; perbaruiTombol(); return true; });
     });
   }).catch(function(e){
     var n = e && e.name;
     if(deviceId && !sudahCoba && (n === "OverconstrainedError" || n === "NotFoundError")) return bukaKamera(null, true);
     if(n === "NotAllowedError" || n === "SecurityError")
-      error("Izin kamera ditolak. Aktifkan izin kamera untuk situs ini di pengaturan browser, lalu coba lagi. Atau pilih foto dari galeri.");
+      kameraGagal("Izin kamera ditolak. Aktifkan izin kamera untuk situs ini di pengaturan browser, atau pilih foto dari galeri di bawah.");
     else if(n === "NotFoundError" || n === "OverconstrainedError")
-      error("Kamera tidak ditemukan di perangkat ini. Kamu bisa memilih foto dari galeri.");
+      kameraGagal("Kamera tidak ditemukan di perangkat ini. Kamu bisa memilih foto dari galeri di bawah.");
     else
-      error("Kamera tidak bisa dibuka (mungkin sedang dipakai aplikasi lain). Tutup aplikasi itu lalu coba lagi.");
+      kameraGagal("Kamera tidak bisa dibuka (mungkin sedang dipakai aplikasi lain). Tutup aplikasi itu lalu coba lagi, atau pilih foto dari galeri.");
     return false;
   });
 }
 function siapkanLayarKamera(){
+  if(!slots.length) return;
   var sl = slots[0];
   $("cam").style.aspectRatio = sl[2] + " / " + sl[3];
+  resetProgresFoto();
+}
+function resetProgresFoto(){
   var dots = $("dots"); dots.innerHTML = "";
   for(var i=0;i<slots.length;i++) dots.appendChild(document.createElement("i"));
   var th = $("thumbs"); th.innerHTML = "";
-  th.style.gridTemplateColumns = "repeat(" + Math.min(slots.length,4) + ",minmax(0,1fr))";
+  th.style.gridTemplateColumns = "repeat(" + Math.min(slots.length || 1,4) + ",minmax(0,1fr))";
 }
-function mulaiSesi(){
-  if(sudahBerakhir()){ tampil("s-pilih"); return; }
-  if(!frameImg || !slots.length) return;
+function masukStudio(m){
+  if(sudahBerakhir()){ tampil("s-awal"); return; }
   foto = []; sedangJepret = false; token++; stopRekam();
-  siapkanLayarKamera();
   $("count").textContent = "";
-  $("btn-jepret").disabled = false; $("pilih-kamera").disabled = false; $("btn-jepret").textContent = "Mulai Hitung Mundur";
-  tampil("s-kamera");
-  bukaKamera(null, false);
+  siapkanLayarKamera();
+  tampil("s-studio");
+  setMode(m);
 }
 // potong gambar sumber agar pas (cover) ke kotak w x h, dengan efek cermin
 function gambarCover(ctx, src, sw, sh, w, h, cermin){
@@ -435,6 +613,7 @@ function ambilFrameVideo(i){
   gambarCover(c.getContext("2d"), v, v.videoWidth, v.videoHeight, c.width, c.height, cerminAktif);
   return c;
 }
+
 function tambahThumb(c){
   var t = document.createElement("canvas"); t.width = 130; t.height = Math.round(130 * c.height / c.width);
   t.getContext("2d").drawImage(c,0,0,t.width,t.height);
@@ -444,14 +623,16 @@ function tambahThumb(c){
 function jepretBerurutan(){
   if(sedangJepret) return;
   var v = $("video");
-  if(!stream || !v.videoWidth){ error("Kamera belum siap. Coba lagi.", true); return; }
-  sedangJepret = true; $("btn-jepret").disabled = true; $("pilih-kamera").disabled = true;
+  if(!stream || !v.videoWidth){ pesanStudio("Kamera belum siap. Tunggu sebentar lalu tekan Mulai Foto lagi.", false); return; }
+  pesanStudio("", false);
+  foto = []; resetProgresFoto();
+  sedangJepret = true; perbaruiTombol();
   gifToken++; mulaiRekam();
   var my = token, total = slots.length;
   (function langkah(){
     if(my !== token) return;
     if(foto.length >= total){ sedangJepret = false; buatHasil(); return; }
-    $("btn-jepret").textContent = "Foto " + (foto.length+1) + " dari " + total;
+    perbaruiTombol();
     var n = HITUNG_MUNDUR;
     (function hitung(){
       if(my !== token) return;
@@ -464,15 +645,12 @@ function jepretBerurutan(){
   })();
 }
 
-// ====== GALERI (cadangan kalau kamera tidak bisa) ======
-function dariGaleri(files){
+// ====== BUAT DARI GALERI ======
+function buatDariGaleri(){
   var total = slots.length;
-  files = Array.prototype.slice.call(files || []);
-  if(files.length !== total){
-    error("Frame ini butuh tepat " + total + " foto. Kamu memilih " + files.length + ". Pilih lagi dari galeri.");
-    return;
-  }
-  Promise.all(files.map(function(f, i){
+  if(uploadFiles.length !== total) return;
+  $("btn-mulai").disabled = true;
+  Promise.all(uploadFiles.map(function(f, i){
     return new Promise(function(res, rej){
       var u = URL.createObjectURL(f), im = new Image();
       im.onload = function(){
@@ -484,7 +662,7 @@ function dariGaleri(files){
       im.src = u;
     });
   })).then(function(cs){ foto = cs; buatHasil(); })
-     .catch(function(){ error("Salah satu file bukan gambar yang bisa dibuka. Pilih foto JPG atau PNG."); });
+     .catch(function(){ perbaruiTombol(); pesanStudio("Salah satu file bukan gambar yang bisa dibuka. Pilih foto JPG atau PNG.", false); });
 }
 
 // ====== HASIL ======
@@ -506,30 +684,47 @@ function buatHasil(){
     hasilBlob = b; hasilUrl = URL.createObjectURL(b);
     $("hasil-img").src = hasilUrl;
     $("modal-ig").hidden = true;
+    sudahFoto = false; sudahGif = false;
+    resetTombolUnduh();
     hit("sesi", frameDipilih && frameDipilih.nama);
-    tampil("s-hasil");
-    mulaiGif();
+    mulaiProses();
   }, "image/png");
+}
+function resetTombolUnduh(){
+  $("btn-unduh").textContent = "Unduh Foto"; $("btn-unduh").classList.remove("ok"); $("btn-unduh").classList.add("gold");
+  $("btn-gif").textContent = "Unduh GIF"; $("btn-gif").classList.remove("ok"); $("btn-gif").classList.add("gold");
+  $("hint-unduh").textContent = "Simpan foto dan GIF-nya di bawah ini.";
+}
+function tandaiUnduh(tombol, label){
+  tombol.textContent = label + " (sudah tersimpan)"; tombol.classList.remove("gold"); tombol.classList.add("ok");
+  var gifAda = !!gifBlob;
+  if(sudahFoto && (sudahGif || !gifAda)) $("hint-unduh").textContent = "Semua sudah tersimpan. Terima kasih sudah berfoto!";
+  else if(sudahFoto) $("hint-unduh").textContent = "Foto tersimpan. Simpan GIF-nya juga ya.";
+  else if(sudahGif) $("hint-unduh").textContent = "GIF tersimpan. Simpan fotonya juga ya.";
 }
 function simpanBlob(blob, url, nama){
   var a = document.createElement("a");
   a.href = url; a.download = nama;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
+// Pop-up Instagram: muncul begitu foto DAN GIF sudah diunduh (dan lagi setiap kali tombol unduh ditekan sesudahnya)
+function cekPopup(tombol){
+  if(sudahFoto && (sudahGif || !gifBlob)) bukaModalIg(tombol);
+}
 function unduh(){
   if(!hasilBlob || !hasilUrl) return;
   simpanBlob(hasilBlob, hasilUrl, "rawznap-natal-" + Date.now() + ".png");
-  hit("unduh_foto");
-  bukaModalIg($("btn-unduh"));
+  hit("unduh_foto"); sudahFoto = true; tandaiUnduh($("btn-unduh"), "Foto");
+  cekPopup($("btn-unduh"));
 }
 function unduhGif(){
   if(!gifBlob || !gifUrl) return;
   simpanBlob(gifBlob, gifUrl, "rawznap-natal-" + Date.now() + ".gif");
-  hit("unduh_gif");
-  bukaModalIg($("btn-gif"));
+  hit("unduh_gif"); sudahGif = true; tandaiUnduh($("btn-gif"), "GIF");
+  cekPopup($("btn-gif"));
 }
 
-// ====== POP UP INSTAGRAM (muncul setiap kali tombol simpan ditekan; pengunjung yang memilih) ======
+// ====== POP UP INSTAGRAM (pengunjung yang memilih, tidak otomatis pindah) ======
 var fokusBalik = null;
 function bukaModalIg(dariTombol){
   fokusBalik = dariTombol || null;
@@ -538,6 +733,37 @@ function bukaModalIg(dariTombol){
 function tutupModalIg(){
   $("modal-ig").hidden = true;
   if(fokusBalik && fokusBalik.focus) fokusBalik.focus();
+}
+
+// ====== LAYAR PROSES (animasi cetak sambil GIF disiapkan) ======
+function mulaiProses(){
+  var kurang = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var MIN = kurang ? 600 : MIN_PROSES;
+  var my = ++prosesToken;
+  if(prosesTimer){ clearInterval(prosesTimer); prosesTimer = null; }
+  var im = $("proses-img");
+  im.src = hasilUrl; $("keluar").style.aspectRatio = fW + " / " + fH;
+  im.style.animationDuration = (MIN/1000) + "s";
+  im.classList.remove("jalan"); void im.offsetWidth; im.classList.add("jalan");
+  $("proses-bar").style.width = "0%"; $("proses-teks").textContent = "Menyiapkan hasil fotomu...";
+  tampil("s-proses");
+  var t0 = performance.now(), gifPr = 0, gifOk = false;
+  mulaiGif(function(p){ gifPr = p; }, function(){ gifOk = true; gifPr = 1; });
+  var teks = ["Menyiapkan hasil fotomu...", "Memasang frame Natal...", "Merangkai GIF-nya...", "Hampir selesai..."];
+  prosesTimer = setInterval(function(){
+    if(my !== prosesToken){ clearInterval(prosesTimer); prosesTimer = null; return; }
+    var el = performance.now() - t0, tp = Math.min(el / MIN, 1);
+    if(el > 45000 && !gifOk){ gifToken++; gifOk = true; gifPr = 1; }   // jaga-jaga kalau GIF macet
+    if(gifOk && el >= MIN){
+      clearInterval(prosesTimer); prosesTimer = null;
+      $("proses-bar").style.width = "100%"; $("proses-teks").textContent = "Selesai!";
+      setTimeout(function(){ if(my === prosesToken) tampil("s-hasil"); }, kurang ? 100 : 450);
+      return;
+    }
+    var p = Math.min(tp, gifPr) * 0.97;
+    $("proses-bar").style.width = Math.round(p * 100) + "%";
+    $("proses-teks").textContent = teks[Math.min(3, Math.floor(p * 4 / 0.97))];
+  }, 80);
 }
 
 // ====== REKAM PROSES BERFOTO -> GIF ======
@@ -559,7 +785,6 @@ function mulaiRekam(){
   ambil(); rekam.timer = setInterval(ambil, rekam.interval);
 }
 function stopRekam(){ if(rekam.timer){ clearInterval(rekam.timer); rekam.timer = null; } }
-
 // Palet 256 warna dari semua gambar (median cut), lalu tabel pencari warna terdekat
 function bangunPalet(frames){
   var hist = new Float64Array(32768), n = frames.length, langkah = Math.max(1, Math.floor(n / 24));
@@ -710,47 +935,81 @@ function buatGifStrip(klip, delayCs, onProgress, batal){
     })();
   });
 }
-function mulaiGif(){
-  var my = ++gifToken;
+
+// Klip animasi dari foto galeri: foto muncul satu per satu ke dalam frame
+function klipUpload(){
+  var n = slots.length, S = 6, H = 12, L = n*S + H, w = rekam.w, h = rekam.h, out = [];
+  var c = document.createElement("canvas"); c.width = w; c.height = h;
+  var x = c.getContext("2d", {willReadFrequently:true});
+  x.fillStyle = "#efe6d2"; x.fillRect(0,0,w,h);
+  var kosong = x.getImageData(0,0,w,h);
+  for(var i=0;i<n;i++){
+    x.clearRect(0,0,w,h);
+    gambarCover(x, foto[i], foto[i].width, foto[i].height, w, h, false);
+    var pen = x.getImageData(0,0,w,h), mid = x.createImageData(w,h);
+    for(var p=0;p<mid.data.length;p++) mid.data[p] = (kosong.data[p] + pen.data[p]) >> 1;
+    var arr = [], t = i*S;
+    for(var k=0;k<L;k++) arr.push({ t:k, d: k < t ? kosong : (k === t ? mid : pen) });
+    out.push(arr);
+  }
+  return out;
+}
+function mulaiGif(onProg, selesai){
+  var my = ++gifToken, selesaiPanggil = false;
+  function fin(){ if(!selesaiPanggil){ selesaiPanggil = true; if(selesai) selesai(); } }
   if(gifUrl){ URL.revokeObjectURL(gifUrl); gifUrl = null; } gifBlob = null;
-  $("gif-img").hidden = true; $("btn-gif").disabled = true;
-  var klip = (rekam.frames && rekam.frames.length && rekam.titik.length === slots.length) ? potongKlip() : null;
-  if(!klip){ $("gif-box").hidden = true; return; }   // mis. dari galeri: tidak ada proses kamera
-  $("gif-box").hidden = false; $("gif-status").textContent = "Menyiapkan GIF strip... 0%";
+  $("gif-img").removeAttribute("src"); $("btn-gif").disabled = true; $("gif-kartu").hidden = true; $("catatan-hasil").hidden = true;
+  var klip = null;
+  if(mode === "upload"){
+    var gs = GIF_LEBAR / fW, sl = slots[0];
+    rekam.w = Math.max(2, Math.round(sl[2]*gs)); rekam.h = Math.max(2, Math.round(sl[3]*gs)); rekam.interval = 170;
+    try { klip = klipUpload(); } catch(e){ klip = null; }
+  } else {
+    klip = (rekam.frames && rekam.frames.length && rekam.titik.length === slots.length) ? potongKlip() : null;
+  }
+  if(!klip){ $("catatan-hasil").textContent = "GIF tidak bisa dibuat kali ini. Foto stripmu tetap bisa disimpan."; $("catatan-hasil").hidden = false; fin(); return; }
   var delay = Math.max(2, Math.round(rekam.interval / 10));
-  buatGifStrip(klip, delay, function(pr){
-    if(my === gifToken) $("gif-status").textContent = "Menyiapkan GIF strip... " + Math.round(pr*100) + "%";
-  }, function(){ return my !== gifToken; }).then(function(blob){
-    if(!blob || my !== gifToken) return;
+  buatGifStrip(klip, delay, function(pr){ if(my === gifToken && onProg) onProg(pr); }, function(){ return my !== gifToken; })
+  .then(function(blob){
+    if(my !== gifToken) { fin(); return; }
+    if(!blob) throw new Error("gif");
     gifBlob = blob; gifUrl = URL.createObjectURL(blob);
-    $("gif-img").src = gifUrl; $("gif-img").hidden = false; $("btn-gif").disabled = false;
-    $("gif-status").textContent = "GIF strip dengan frame sudah siap (" + (blob.size/1048576).toFixed(1).replace(".",",") + " MB).";
+    $("gif-img").src = gifUrl; $("gif-kartu").hidden = false; $("btn-gif").disabled = false;
     rekam.frames = []; rekam.titik = [];
+    fin();
   }).catch(function(){
-    if(my === gifToken){ $("gif-status").textContent = "GIF tidak bisa dibuat kali ini. Foto stripmu tetap bisa disimpan."; }
+    if(my === gifToken){ $("catatan-hasil").textContent = "GIF tidak bisa dibuat kali ini. Foto stripmu tetap bisa disimpan."; $("catatan-hasil").hidden = false; }
+    fin();
   });
 }
 
 // ====== TOMBOL ======
-$("btn-mulai").addEventListener("click", mulaiSesi);
-$("btn-jepret").addEventListener("click", jepretBerurutan);
-$("btn-batal-kamera").addEventListener("click", function(){ token++; sedangJepret = false; stopRekam(); hentikanKamera(); tampil("s-pilih"); });
+function keAwal(){
+  token++; sedangJepret = false; stopRekam(); hentikanKamera(); pesanStudio("", false); $("count").textContent = "";
+  perbaruiTombol(); tampil("s-awal");
+}
+$("btn-awal-kamera").addEventListener("click", function(){ masukStudio("kamera"); });
+$("btn-awal-upload").addEventListener("click", function(){ masukStudio("upload"); });
+$("btn-kembali-awal").addEventListener("click", keAwal);
+$("btn-ganti-mode").addEventListener("click", function(){ if(!sedangJepret) setMode(mode === "kamera" ? "upload" : "kamera"); });
+$("btn-coba-lagi").addEventListener("click", function(){ kameraId = null; setMode("kamera"); });
+$("btn-mulai").addEventListener("click", function(){ if(mode === "kamera") jepretBerurutan(); else buatDariGaleri(); });
+$("btn-error-kembali").addEventListener("click", function(){ if(frameImg){ masukStudio(mode); } else keAwal(); });
 $("btn-unduh").addEventListener("click", unduh);
-$("btn-ulang").addEventListener("click", function(){ gifToken++; $("modal-ig").hidden = true; mulaiSesi(); });
 $("btn-gif").addEventListener("click", unduhGif);
+$("btn-ulang").addEventListener("click", function(){ gifToken++; prosesToken++; $("modal-ig").hidden = true; bersihkanUpload(); masukStudio(mode); });
 $("btn-modal-tutup").addEventListener("click", tutupModalIg);
 $("modal-ig").addEventListener("click", function(e){ if(e.target === $("modal-ig")) tutupModalIg(); });
 document.addEventListener("keydown", function(e){ if(e.key === "Escape" && !$("modal-ig").hidden) tutupModalIg(); });
 $("btn-ig-modal").addEventListener("click", function(){ hit("ig"); setTimeout(tutupModalIg, 300); });
-$("btn-coba-lagi").addEventListener("click", mulaiSesi);
 $("pilih-kamera").addEventListener("change", function(e){ if(!sedangJepret) bukaKamera(e.target.value, true); });
-$("file-galeri").addEventListener("change", function(e){ dariGaleri(e.target.files); e.target.value = ""; });
+$("file-galeri").addEventListener("change", function(e){ pilihFileGaleri(e.target.files); e.target.value = ""; });
 document.addEventListener("visibilitychange", function(){
   if(document.hidden){ if(!sedangJepret) hentikanKamera(); }
-  else if(!$("s-kamera").hidden && !stream && !sedangJepret){ bukaKamera(kameraId, true); }
+  else if(!$("s-studio").hidden && mode === "kamera" && !stream && !sedangJepret){ bukaKamera(kameraId, false); }
 });
 
-muatConfig().then(function(){ mulaiHitung(); if(sudahBerakhir()) tampil("s-pilih"); else gambarFrame(); });
+muatConfig().then(function(){ mulaiHitung(); if(sudahBerakhir()) tampil("s-awal"); else { gambarFrame(); tampil("s-awal"); } });
 })();
 </script>
 </body>

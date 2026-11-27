@@ -38,11 +38,13 @@ p{margin:0;line-height:1.5}
 .frame span{display:block;margin-top:6px;font-size:.82rem;text-align:center}
 .frame[aria-pressed="true"]{border-color:var(--gold);background:#ffd66622}
 .cam{position:relative;width:100%;aspect-ratio:520/390;background:#000;border-radius:16px;overflow:hidden;border:3px solid #ffffff33}
-.cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cam video.cermin{transform:scaleX(-1)}
 .count{position:absolute;inset:0;display:grid;place-items:center;font-size:7rem;font-weight:800;color:#fff;text-shadow:0 4px 24px #0009;pointer-events:none}
 .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
 .flash.on{animation:fl .35s ease-out}
 @keyframes fl{0%{opacity:.95}100%{opacity:0}}
+.pilih{width:100%;min-height:46px;border-radius:12px;border:2px solid #ffffff44;background:#0b2d22;color:var(--snow);font:inherit;padding:0 12px}
 .dots{display:flex;gap:8px;justify-content:center}
 .dots i{width:14px;height:14px;border-radius:50%;background:#ffffff33}
 .dots i.done{background:var(--gold)}
@@ -81,6 +83,7 @@ footer{margin-top:4px;text-align:center;font-size:.8rem;color:#9fb8aa}
       <div class="count" id="count" aria-live="assertive"></div>
       <div class="flash" id="flash"></div>
     </div>
+    <select id="pilih-kamera" class="pilih" aria-label="Pilih kamera" hidden></select>
     <div class="dots" id="dots" aria-hidden="true"></div>
     <div class="thumbs" id="thumbs"></div>
     <button class="btn" id="btn-jepret">Mulai Hitung Mundur</button>
@@ -128,7 +131,7 @@ var MAKS_FOTO = 6;
 var $ = function(id){ return document.getElementById(id); };
 var config = { instagram: IG_DEFAULT, frames: [] };
 var frameDipilih = null, frameImg = null, slots = [], skala = 2, fW = 600, fH = 1800;
-var stream = null, foto = [], sedangJepret = false;
+var stream = null, foto = [], sedangJepret = false, cerminAktif = true, kameraId = null;
 var hasilBlob = null, hasilUrl = null, igTimer = null, token = 0, pilihToken = 0;
 
 function tampil(id){
@@ -230,19 +233,52 @@ function error(pesan, bolehGaleri){
   $("lbl-galeri").style.display = bolehGaleri === false ? "none" : "block";
   tampil("s-error");
 }
-function bukaKamera(){
+function labelKamera(t){ return (t && t.label) || ""; }
+function perluCermin(track){
+  var st = (track && track.getSettings && track.getSettings()) || {};
+  return !(st.facingMode === "environment" || /back|rear|belakang/i.test(labelKamera(track)));
+}
+function isiDaftarKamera(aktifId){
+  var sel = $("pilih-kamera");
+  return navigator.mediaDevices.enumerateDevices().then(function(list){
+    var cams = list.filter(function(d){ return d.kind === "videoinput"; });
+    sel.innerHTML = "";
+    cams.forEach(function(d, i){
+      var o = document.createElement("option");
+      o.value = d.deviceId; o.textContent = d.label || ("Kamera " + (i+1));
+      if(d.deviceId === aktifId) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.hidden = cams.length < 2;
+    return cams;
+  }).catch(function(){ sel.hidden = true; return []; });
+}
+function bukaKamera(deviceId, sudahCoba){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
     error("Browser ini belum bisa membuka kamera. Buka lewat Chrome atau Safari, atau pilih foto dari galeri.");
     return Promise.resolve(false);
   }
-  return navigator.mediaDevices.getUserMedia({
-    video:{ facingMode:"user", width:{ideal:1280}, height:{ideal:960} }, audio:false
-  }).then(function(s){
+  hentikanKamera();
+  var video = { width:{ideal:1280}, height:{ideal:960} };
+  if(deviceId) video.deviceId = { exact: deviceId }; else video.facingMode = "user";
+  return navigator.mediaDevices.getUserMedia({ video: video, audio:false }).then(function(s){
     stream = s;
+    var track = s.getVideoTracks()[0];
+    var aktifId = (track && track.getSettings && track.getSettings().deviceId) || deviceId || null;
     var v = $("video"); v.srcObject = s;
-    return v.play().catch(function(){}).then(function(){ return true; });
+    cerminAktif = perluCermin(track); v.classList.toggle("cermin", cerminAktif);
+    return isiDaftarKamera(aktifId).then(function(cams){
+      // Mac sering otomatis memakai kamera iPhone; kalau ada kamera lain, pindah ke kamera laptop
+      if(!deviceId && !sudahCoba && /iphone|ipad/i.test(labelKamera(track))){
+        var lain = cams.filter(function(d){ return !/iphone|ipad|desk view/i.test(d.label); })[0];
+        if(lain && lain.deviceId !== aktifId) return bukaKamera(lain.deviceId, true);
+      }
+      kameraId = aktifId;
+      return v.play().catch(function(){}).then(function(){ return true; });
+    });
   }).catch(function(e){
     var n = e && e.name;
+    if(deviceId && !sudahCoba && (n === "OverconstrainedError" || n === "NotFoundError")) return bukaKamera(null, true);
     if(n === "NotAllowedError" || n === "SecurityError")
       error("Izin kamera ditolak. Aktifkan izin kamera untuk situs ini di pengaturan browser, lalu coba lagi. Atau pilih foto dari galeri.");
     else if(n === "NotFoundError" || n === "OverconstrainedError")
@@ -265,9 +301,9 @@ function mulaiSesi(){
   foto = []; sedangJepret = false; token++;
   siapkanLayarKamera();
   $("count").textContent = "";
-  $("btn-jepret").disabled = false; $("btn-jepret").textContent = "Mulai Hitung Mundur";
+  $("btn-jepret").disabled = false; $("pilih-kamera").disabled = false; $("btn-jepret").textContent = "Mulai Hitung Mundur";
   tampil("s-kamera");
-  bukaKamera();
+  bukaKamera(null, false);
 }
 // potong gambar sumber agar pas (cover) ke kotak w x h, dengan efek cermin
 function gambarCover(ctx, src, sw, sh, w, h, cermin){
@@ -284,7 +320,7 @@ function kanvasSlot(i){
 }
 function ambilFrameVideo(i){
   var v = $("video"), c = kanvasSlot(i);
-  gambarCover(c.getContext("2d"), v, v.videoWidth, v.videoHeight, c.width, c.height, true);
+  gambarCover(c.getContext("2d"), v, v.videoWidth, v.videoHeight, c.width, c.height, cerminAktif);
   return c;
 }
 function tambahThumb(c){
@@ -297,7 +333,7 @@ function jepretBerurutan(){
   if(sedangJepret) return;
   var v = $("video");
   if(!stream || !v.videoWidth){ error("Kamera belum siap. Coba lagi.", true); return; }
-  sedangJepret = true; $("btn-jepret").disabled = true;
+  sedangJepret = true; $("btn-jepret").disabled = true; $("pilih-kamera").disabled = true;
   var my = token, total = slots.length;
   (function langkah(){
     if(my !== token) return;
@@ -387,10 +423,11 @@ $("btn-ulang").addEventListener("click", function(){ batalIg(); mulaiSesi(); });
 $("btn-ig").addEventListener("click", function(){ batalIg(); bukaIg(); });
 $("btn-ig-batal").addEventListener("click", function(){ batalIg(); $("ig-box").hidden = true; });
 $("btn-coba-lagi").addEventListener("click", mulaiSesi);
+$("pilih-kamera").addEventListener("change", function(e){ if(!sedangJepret) bukaKamera(e.target.value, true); });
 $("file-galeri").addEventListener("change", function(e){ dariGaleri(e.target.files); e.target.value = ""; });
 document.addEventListener("visibilitychange", function(){
   if(document.hidden){ if(!sedangJepret) hentikanKamera(); }
-  else if(!$("s-kamera").hidden && !stream && !sedangJepret){ bukaKamera(); }
+  else if(!$("s-kamera").hidden && !stream && !sedangJepret){ bukaKamera(kameraId, true); }
 });
 
 muatConfig().then(gambarFrame);

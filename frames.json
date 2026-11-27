@@ -1,0 +1,11 @@
+{
+  "judul": "RAWZNAP Photobooth Natal",
+  "instagram": "https://www.instagram.com/rawznap.box/",
+  "frames": [
+    { "nama": "Take a Break", "file": "frames/1_xmas.webp", "kecil": "frames/1_xmas-kecil.webp" },
+    { "nama": "Santa", "file": "frames/2_xmas.webp", "kecil": "frames/2_xmas-kecil.webp" },
+    { "nama": "Kado Pastel", "file": "frames/3_xmas.webp", "kecil": "frames/3_xmas-kecil.webp" },
+    { "nama": "Ugly Sweater", "file": "frames/4_xmas.webp", "kecil": "frames/4_xmas-kecil.webp" },
+    { "nama": "Kucing Natal", "file": "frames/5_xmas.webp", "kecil": "frames/5_xmas-kecil.webp" }
+  ]
+}

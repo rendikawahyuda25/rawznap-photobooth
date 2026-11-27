@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RAWZNAP Photobooth Natal</title>
+<style>
+:root{
+  --pine:#0f3d2e; --pine2:#0b2d22; --berry:#b3202f; --snow:#fff6e8; --gold:#ffd666; --ink:#10201a;
+  --font:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;min-height:100%}
+body{background:var(--pine2);color:var(--snow);font-family:var(--font);
+  background-image:radial-gradient(circle at 20% 10%,#164f3b 0,transparent 45%),radial-gradient(circle at 85% 90%,#5a1620 0,transparent 40%);
+  min-height:100dvh;padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px));
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font-size:1.6rem;line-height:1.15;margin:8px 0 0;text-wrap:balance}
+h1 small{display:block;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+p{margin:0;line-height:1.5}
+.muted{color:#cfe0d6;font-size:.92rem}
+.screen[hidden]{display:none}
+.screen{display:flex;flex-direction:column;gap:14px}
+.btn{appearance:none;border:0;border-radius:14px;padding:15px 18px;font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer;
+  background:var(--berry);color:#fff;min-height:52px;width:100%;transition:transform .08s}
+.btn:active{transform:scale(.98)}
+.btn:focus-visible,.frame:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn.alt{background:transparent;border:2px solid #ffffff55;color:var(--snow)}
+.btn.gold{background:var(--gold);color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:default}
+.frames{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px}
+.aksi{position:sticky;bottom:0;display:flex;flex-direction:column;gap:6px;padding:10px 0 4px;background:linear-gradient(to top,var(--pine2) 70%,transparent)}
+.aksi .muted{font-size:.82rem;text-align:center}
+.frame{appearance:none;border:3px solid transparent;border-radius:12px;padding:4px;background:#ffffff14;cursor:pointer;color:inherit;font:inherit}
+.frame img{display:block;width:100%;height:auto;aspect-ratio:1/3;border-radius:8px;background:#fff3}
+.frame span{display:block;margin-top:6px;font-size:.82rem;text-align:center}
+.frame[aria-pressed="true"]{border-color:var(--gold);background:#ffd66622}
+.cam{position:relative;width:100%;aspect-ratio:520/390;background:#000;border-radius:16px;overflow:hidden;border:3px solid #ffffff33}
+.cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.count{position:absolute;inset:0;display:grid;place-items:center;font-size:7rem;font-weight:800;color:#fff;text-shadow:0 4px 24px #0009;pointer-events:none}
+.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+.flash.on{animation:fl .35s ease-out}
+@keyframes fl{0%{opacity:.95}100%{opacity:0}}
+.dots{display:flex;gap:8px;justify-content:center}
+.dots i{width:14px;height:14px;border-radius:50%;background:#ffffff33}
+.dots i.done{background:var(--gold)}
+.thumbs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.thumbs canvas{width:100%;height:auto;border-radius:6px;background:#0006}
+.result{display:block;width:100%;max-width:300px;height:auto;margin:0 auto;border-radius:6px;box-shadow:0 10px 40px #0008;background:#fff2}
+.box{background:#ffffff14;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.err{background:#5a1620;border:1px solid #ff8a8a66}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row .btn{flex:1 1 140px}
+footer{margin-top:4px;text-align:center;font-size:.8rem;color:#9fb8aa}
+@media (prefers-reduced-motion:reduce){.flash.on{animation:none;opacity:0}.btn{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1><small>@rawznap.box</small><span id="judul">Photobooth Natal</span></h1>
+  </header>
+
+  <!-- 1. PILIH FRAME -->
+  <section class="screen" id="s-pilih">
+    <p class="muted">Pilih frame Natal favoritmu, lalu ambil fotonya. Hasilnya bisa kamu simpan gratis.</p>
+    <div class="frames" id="frames" role="group" aria-label="Pilihan frame"></div>
+    <div class="aksi">
+      <p class="muted" id="info-frame" aria-live="polite"></p>
+      <button class="btn" id="btn-mulai" disabled>Mulai Foto</button>
+    </div>
+    <p class="muted" id="info-priv">Fotomu diproses di HP kamu sendiri dan tidak dikirim ke mana pun.</p>
+  </section>
+
+  <!-- 2. KAMERA -->
+  <section class="screen" id="s-kamera" hidden>
+    <div class="cam" id="cam">
+      <video id="video" playsinline muted autoplay></video>
+      <div class="count" id="count" aria-live="assertive"></div>
+      <div class="flash" id="flash"></div>
+    </div>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+    <div class="thumbs" id="thumbs"></div>
+    <button class="btn" id="btn-jepret">Mulai Hitung Mundur</button>
+    <button class="btn alt" id="btn-batal-kamera">Kembali</button>
+  </section>
+
+  <!-- 3. HASIL -->
+  <section class="screen" id="s-hasil" hidden>
+    <img class="result" id="hasil-img" alt="Hasil foto strip kamu">
+    <div class="row">
+      <button class="btn gold" id="btn-unduh">Simpan Foto</button>
+      <button class="btn alt" id="btn-ulang">Foto Lagi</button>
+    </div>
+    <p class="muted" id="hint-ios">Kalau foto tidak otomatis tersimpan, tahan lama pada gambar lalu pilih Simpan.</p>
+    <div class="box" id="ig-box" hidden>
+      <p><b>Foto tersimpan.</b> Kamu akan diarahkan ke Instagram @rawznap.box dalam <span id="ig-detik">4</span> detik.</p>
+      <div class="row">
+        <button class="btn" id="btn-ig">Buka Instagram Sekarang</button>
+        <button class="btn alt" id="btn-ig-batal">Nanti Dulu</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PESAN ERROR -->
+  <section class="screen" id="s-error" hidden>
+    <div class="box err"><p id="err-teks"></p></div>
+    <label class="btn gold" id="lbl-galeri" style="display:block;text-align:center" for="file-galeri">Pilih Foto dari Galeri</label>
+    <input type="file" id="file-galeri" accept="image/*" multiple hidden>
+    <button class="btn alt" id="btn-coba-lagi">Coba Kamera Lagi</button>
+  </section>
+
+  <footer>RAWZNAP · Photobox Kalimantan Barat</footer>
+</main>
+
+<script>
+(function(){
+"use strict";
+// ====== PENGATURAN (jarang perlu diubah) ======
+var HITUNG_MUNDUR = 3;          // detik antar jepretan
+var LEBAR_HASIL   = 1200;       // lebar gambar akhir (px)
+var REDIRECT_DETIK = 4;
+var IG_DEFAULT = "https://www.instagram.com/rawznap.box/";
+var MAKS_FOTO = 6;
+
+var $ = function(id){ return document.getElementById(id); };
+var config = { instagram: IG_DEFAULT, frames: [] };
+var frameDipilih = null, frameImg = null, slots = [], skala = 2, fW = 600, fH = 1800;
+var stream = null, foto = [], sedangJepret = false;
+var hasilBlob = null, hasilUrl = null, igTimer = null, token = 0, pilihToken = 0;
+
+function tampil(id){
+  ["s-pilih","s-kamera","s-hasil","s-error"].forEach(function(s){ $(s).hidden = (s !== id); });
+  window.scrollTo(0,0);
+}
+
+// ====== MUAT DAFTAR FRAME ======
+function muatConfig(){
+  return fetch("frames.json",{cache:"no-cache"}).then(function(r){
+    if(!r.ok) throw new Error("frames.json");
+    return r.json();
+  }).then(function(j){
+    if(j && Array.isArray(j.frames)) config.frames = j.frames;
+    if(j && j.instagram) config.instagram = j.instagram;
+    if(j && j.judul) { $("judul").textContent = j.judul; document.title = j.judul; }
+  }).catch(function(){
+    $("frames").innerHTML = "";
+    $("info-priv").textContent = "Frame belum bisa dimuat. Coba muat ulang halaman.";
+  });
+}
+function gambarFrame(){
+  var wadah = $("frames"); wadah.innerHTML = "";
+  config.frames.forEach(function(f, i){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "frame"; b.setAttribute("aria-pressed","false");
+    var im = new Image(); im.src = f.kecil || f.file; im.alt = ""; im.loading = "lazy"; im.decoding = "async";
+    var s = document.createElement("span"); s.textContent = f.nama || ("Frame " + (i+1));
+    b.appendChild(im); b.appendChild(s);
+    b.addEventListener("click", function(){ pilihFrame(i); });
+    wadah.appendChild(b);
+  });
+  if(config.frames.length) pilihFrame(0);
+}
+
+// Cari area transparan (tempat foto) di dalam gambar frame, urut dari atas ke bawah
+function deteksiJendela(img){
+  var W = img.naturalWidth, H = img.naturalHeight;
+  var c = document.createElement("canvas"); c.width = W; c.height = H;
+  var x = c.getContext("2d", {willReadFrequently:true}); x.drawImage(img,0,0);
+  var d = x.getImageData(0,0,W,H).data;
+  var vis = new Uint8Array(W*H), stack = new Int32Array(W*H), out = [], PAD = 3;
+  for(var s0=0; s0<W*H; s0++){
+    if(vis[s0] || d[s0*4+3] >= 16) continue;
+    var sp = 0, minx = W, miny = H, maxx = 0, maxy = 0, area = 0, sentuh = false;
+    stack[sp++] = s0; vis[s0] = 1;
+    while(sp){
+      var p = stack[--sp], px = p % W, py = (p - px) / W; area++;
+      if(px<minx)minx=px; if(px>maxx)maxx=px; if(py<miny)miny=py; if(py>maxy)maxy=py;
+      if(px===0||py===0||px===W-1||py===H-1) sentuh = true;
+      if(px>0 && !vis[p-1] && d[(p-1)*4+3]<16){ vis[p-1]=1; stack[sp++]=p-1; }
+      if(px<W-1 && !vis[p+1] && d[(p+1)*4+3]<16){ vis[p+1]=1; stack[sp++]=p+1; }
+      if(py>0 && !vis[p-W] && d[(p-W)*4+3]<16){ vis[p-W]=1; stack[sp++]=p-W; }
+      if(py<H-1 && !vis[p+W] && d[(p+W)*4+3]<16){ vis[p+W]=1; stack[sp++]=p+W; }
+    }
+    if(area >= W*H*0.01 && !sentuh){
+      var x0 = Math.max(0,minx-PAD), y0 = Math.max(0,miny-PAD);
+      var x1 = Math.min(W,maxx+1+PAD), y1 = Math.min(H,maxy+1+PAD);
+      out.push([x0,y0,x1-x0,y1-y0]);
+    }
+  }
+  out.sort(function(a,b){
+    var tol = Math.min(a[3],b[3]) * 0.25;
+    return Math.abs(a[1]-b[1]) < tol ? a[0]-b[0] : a[1]-b[1];
+  });
+  return out.slice(0, MAKS_FOTO);
+}
+
+function pilihFrame(i){
+  frameDipilih = config.frames[i];
+  var my = ++pilihToken;
+  var kids = $("frames").children;
+  for(var k=0;k<kids.length;k++) kids[k].setAttribute("aria-pressed", k===i ? "true":"false");
+  $("btn-mulai").disabled = true; frameImg = null; slots = [];
+  $("info-frame").textContent = "Memuat frame...";
+  var im = new Image();
+  im.onload = function(){
+    if(my !== pilihToken) return;
+    var js;
+    try { js = Array.isArray(frameDipilih.slots) && frameDipilih.slots.length ? frameDipilih.slots : deteksiJendela(im); }
+    catch(e){ js = []; }
+    if(!js.length){ $("info-frame").textContent = "Frame ini belum punya area foto transparan. Pilih frame lain."; return; }
+    frameImg = im; slots = js; fW = im.naturalWidth; fH = im.naturalHeight; skala = LEBAR_HASIL / fW;
+    $("info-frame").textContent = "Frame ini berisi " + slots.length + " foto.";
+    $("btn-mulai").disabled = false;
+  };
+  im.onerror = function(){ if(my === pilihToken) $("info-frame").textContent = "Frame ini gagal dimuat. Coba pilih frame lain."; };
+  im.src = frameDipilih.file;
+}
+
+// ====== KAMERA ======
+function hentikanKamera(){
+  if(stream){ stream.getTracks().forEach(function(t){ t.stop(); }); stream = null; }
+  $("video").srcObject = null;
+}
+function error(pesan, bolehGaleri){
+  hentikanKamera();
+  $("err-teks").textContent = pesan;
+  $("lbl-galeri").style.display = bolehGaleri === false ? "none" : "block";
+  tampil("s-error");
+}
+function bukaKamera(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    error("Browser ini belum bisa membuka kamera. Buka lewat Chrome atau Safari, atau pilih foto dari galeri.");
+    return Promise.resolve(false);
+  }
+  return navigator.mediaDevices.getUserMedia({
+    video:{ facingMode:"user", width:{ideal:1280}, height:{ideal:960} }, audio:false
+  }).then(function(s){
+    stream = s;
+    var v = $("video"); v.srcObject = s;
+    return v.play().catch(function(){}).then(function(){ return true; });
+  }).catch(function(e){
+    var n = e && e.name;
+    if(n === "NotAllowedError" || n === "SecurityError")
+      error("Izin kamera ditolak. Aktifkan izin kamera untuk situs ini di pengaturan browser, lalu coba lagi. Atau pilih foto dari galeri.");
+    else if(n === "NotFoundError" || n === "OverconstrainedError")
+      error("Kamera tidak ditemukan di perangkat ini. Kamu bisa memilih foto dari galeri.");
+    else
+      error("Kamera tidak bisa dibuka (mungkin sedang dipakai aplikasi lain). Tutup aplikasi itu lalu coba lagi.");
+    return false;
+  });
+}
+function siapkanLayarKamera(){
+  var sl = slots[0];
+  $("cam").style.aspectRatio = sl[2] + " / " + sl[3];
+  var dots = $("dots"); dots.innerHTML = "";
+  for(var i=0;i<slots.length;i++) dots.appendChild(document.createElement("i"));
+  var th = $("thumbs"); th.innerHTML = "";
+  th.style.gridTemplateColumns = "repeat(" + Math.min(slots.length,4) + ",minmax(0,1fr))";
+}
+function mulaiSesi(){
+  if(!frameImg || !slots.length) return;
+  foto = []; sedangJepret = false; token++;
+  siapkanLayarKamera();
+  $("count").textContent = "";
+  $("btn-jepret").disabled = false; $("btn-jepret").textContent = "Mulai Hitung Mundur";
+  tampil("s-kamera");
+  bukaKamera();
+}
+// potong gambar sumber agar pas (cover) ke kotak w x h, dengan efek cermin
+function gambarCover(ctx, src, sw, sh, w, h, cermin){
+  var r = Math.max(w/sw, h/sh), dw = sw*r, dh = sh*r, dx = (w-dw)/2, dy = (h-dh)/2;
+  ctx.save();
+  if(cermin){ ctx.translate(w,0); ctx.scale(-1,1); }
+  ctx.drawImage(src, dx, dy, dw, dh);
+  ctx.restore();
+}
+function kanvasSlot(i){
+  var sl = slots[i], c = document.createElement("canvas");
+  c.width = Math.round(sl[2]*skala); c.height = Math.round(sl[3]*skala);
+  return c;
+}
+function ambilFrameVideo(i){
+  var v = $("video"), c = kanvasSlot(i);
+  gambarCover(c.getContext("2d"), v, v.videoWidth, v.videoHeight, c.width, c.height, true);
+  return c;
+}
+function tambahThumb(c){
+  var t = document.createElement("canvas"); t.width = 130; t.height = Math.round(130 * c.height / c.width);
+  t.getContext("2d").drawImage(c,0,0,t.width,t.height);
+  $("thumbs").appendChild(t);
+  var d = $("dots").children; if(d[foto.length-1]) d[foto.length-1].className = "done";
+}
+function jepretBerurutan(){
+  if(sedangJepret) return;
+  var v = $("video");
+  if(!stream || !v.videoWidth){ error("Kamera belum siap. Coba lagi.", true); return; }
+  sedangJepret = true; $("btn-jepret").disabled = true;
+  var my = token, total = slots.length;
+  (function langkah(){
+    if(my !== token) return;
+    if(foto.length >= total){ sedangJepret = false; buatHasil(); return; }
+    $("btn-jepret").textContent = "Foto " + (foto.length+1) + " dari " + total;
+    var n = HITUNG_MUNDUR;
+    (function hitung(){
+      if(my !== token) return;
+      if(n > 0){ $("count").textContent = String(n); n--; setTimeout(hitung, 1000); return; }
+      $("count").textContent = "";
+      var f = $("flash"); f.classList.remove("on"); void f.offsetWidth; f.classList.add("on");
+      var c = ambilFrameVideo(foto.length); foto.push(c); tambahThumb(c);
+      setTimeout(langkah, 700);
+    })();
+  })();
+}
+
+// ====== GALERI (cadangan kalau kamera tidak bisa) ======
+function dariGaleri(files){
+  var total = slots.length;
+  files = Array.prototype.slice.call(files || []);
+  if(files.length !== total){
+    error("Frame ini butuh tepat " + total + " foto. Kamu memilih " + files.length + ". Pilih lagi dari galeri.");
+    return;
+  }
+  Promise.all(files.map(function(f, i){
+    return new Promise(function(res, rej){
+      var u = URL.createObjectURL(f), im = new Image();
+      im.onload = function(){
+        var c = kanvasSlot(i);
+        gambarCover(c.getContext("2d"), im, im.naturalWidth, im.naturalHeight, c.width, c.height, false);
+        URL.revokeObjectURL(u); res(c);
+      };
+      im.onerror = function(){ URL.revokeObjectURL(u); rej(new Error("gambar")); };
+      im.src = u;
+    });
+  })).then(function(cs){ foto = cs; buatHasil(); })
+     .catch(function(){ error("Salah satu file bukan gambar yang bisa dibuka. Pilih foto JPG atau PNG."); });
+}
+
+// ====== HASIL ======
+function buatHasil(){
+  hentikanKamera();
+  var c = document.createElement("canvas");
+  c.width = Math.round(fW*skala); c.height = Math.round(fH*skala);
+  var ctx = c.getContext("2d");
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+  ctx.fillStyle = "#fff"; ctx.fillRect(0,0,c.width,c.height);
+  for(var i=0;i<slots.length;i++){
+    var s = slots[i];
+    ctx.drawImage(foto[i], Math.round(s[0]*skala), Math.round(s[1]*skala), foto[i].width, foto[i].height);
+  }
+  ctx.drawImage(frameImg, 0, 0, c.width, c.height);
+  c.toBlob(function(b){
+    if(!b){ error("Gagal membuat gambar. Coba foto ulang."); return; }
+    if(hasilUrl) URL.revokeObjectURL(hasilUrl);
+    hasilBlob = b; hasilUrl = URL.createObjectURL(b);
+    $("hasil-img").src = hasilUrl;
+    batalIg(); $("ig-box").hidden = true;
+    tampil("s-hasil");
+  }, "image/png");
+}
+function unduh(){
+  if(!hasilBlob || !hasilUrl) return;
+  var a = document.createElement("a");
+  a.href = hasilUrl; a.download = "rawznap-natal-" + Date.now() + ".png";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  mulaiHitungIg();
+}
+function mulaiHitungIg(){
+  batalIg();
+  var n = REDIRECT_DETIK; $("ig-detik").textContent = String(n); $("ig-box").hidden = false;
+  igTimer = setInterval(function(){
+    n--; $("ig-detik").textContent = String(Math.max(n,0));
+    if(n <= 0){ batalIg(); bukaIg(); }
+  }, 1000);
+}
+function batalIg(){ if(igTimer){ clearInterval(igTimer); igTimer = null; } }
+function bukaIg(){ window.location.href = config.instagram; }
+
+// ====== TOMBOL ======
+$("btn-mulai").addEventListener("click", mulaiSesi);
+$("btn-jepret").addEventListener("click", jepretBerurutan);
+$("btn-batal-kamera").addEventListener("click", function(){ token++; hentikanKamera(); tampil("s-pilih"); });
+$("btn-unduh").addEventListener("click", unduh);
+$("btn-ulang").addEventListener("click", function(){ batalIg(); mulaiSesi(); });
+$("btn-ig").addEventListener("click", function(){ batalIg(); bukaIg(); });
+$("btn-ig-batal").addEventListener("click", function(){ batalIg(); $("ig-box").hidden = true; });
+$("btn-coba-lagi").addEventListener("click", mulaiSesi);
+$("file-galeri").addEventListener("change", function(e){ dariGaleri(e.target.files); e.target.value = ""; });
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden){ if(!sedangJepret) hentikanKamera(); }
+  else if(!$("s-kamera").hidden && !stream && !sedangJepret){ bukaKamera(); }
+});
+
+muatConfig().then(gambarFrame);
+})();
+</script>
+</body>
+</html>

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="theme-color" content="#14702a">
 <link rel="preload" href="bg-natal.webp" as="image">
+<link rel="preload" href="logo-rawznap.webp" as="image">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>RAWZNAP Photobooth Natal</title>
 <style>
@@ -27,7 +28,8 @@ main{position:relative;max-width:520px;margin:0 auto;display:flex;flex-direction
   box-shadow:inset 0 0 0 4px var(--krem),inset 0 0 0 7px var(--merah),0 18px 50px rgba(30,15,5,.45)}
 main.lebar{max-width:1040px}
 h1{font-size:1.6rem;line-height:1.15;margin:8px 0 0;text-wrap:balance;color:var(--hijau-tua)}
-h1 small{display:block;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--magenta);margin-bottom:6px}
+h1 .logo{display:block;width:72px;height:auto;margin:0 0 4px}
+h1 #judul{display:block}
 h2{margin:0;font-size:1.2rem;color:var(--hijau-tua)}
 p{margin:0;line-height:1.5}
 .muted{color:var(--tinta2);font-size:.92rem}
@@ -85,9 +87,20 @@ a.btn{display:block;text-align:center;text-decoration:none;line-height:22px}
 .dots i.done{background:var(--magenta)}
 .thumbs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .thumbs canvas{width:100%;height:auto;border-radius:6px;background:var(--krem2)}
-.upload-slots{display:grid;gap:8px;grid-template-columns:repeat(3,minmax(0,1fr))}
-.upload-slots div{position:relative;aspect-ratio:4/3;border-radius:12px;border:2px dashed var(--hijau);background:var(--mint);overflow:hidden;display:grid;place-items:center;color:var(--hijau);font-weight:800;font-size:1.4rem}
-.upload-slots img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.upload-slots{display:grid;gap:14px;padding-top:6px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.slot-up{position:relative;aspect-ratio:4/3}
+.slot-pilih{appearance:none;position:absolute;inset:0;width:100%;height:100%;border-radius:12px;border:2px dashed var(--hijau);background:var(--mint);overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--hijau-tua);font:inherit;cursor:pointer;padding:4px}
+.slot-pilih:hover{background:#cdebd3}
+.slot-pilih:focus-visible{outline:3px solid var(--magenta);outline-offset:2px}
+.slot-pilih strong{font-size:1.4rem;line-height:1}
+.slot-pilih small{font-size:.78rem;font-weight:700}
+.slot-pilih img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.slot-up:has(img) .slot-pilih{border:3px solid var(--hijau)}
+.slot-no{position:absolute;left:6px;bottom:6px;min-width:24px;height:24px;border-radius:999px;background:var(--hijau);color:#fff;font-weight:800;font-size:.8rem;display:grid;place-items:center;padding:0 6px}
+.slot-hapus{appearance:none;position:absolute;top:-8px;right:-8px;width:30px;height:30px;border-radius:50%;border:2px solid #fff;background:var(--merah);color:#fff;
+  font:inherit;font-size:1.15rem;font-weight:800;line-height:1;cursor:pointer;display:grid;place-items:center;box-shadow:0 2px 6px #0005}
+.slot-hapus:focus-visible{outline:3px solid var(--magenta);outline-offset:2px}
 .pesan{background:#ffe6e7;border:2px solid #f08c92;color:#7a0c13;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;font-size:.92rem}
 .frames{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px}
 .frames.terkunci{pointer-events:none;opacity:.55}
@@ -127,7 +140,9 @@ a.btn{display:block;text-align:center;text-decoration:none;line-height:22px}
 .modal-isi{width:100%;max-width:400px;background:var(--krem);border:5px solid var(--hijau);border-radius:22px;padding:22px 18px;display:flex;flex-direction:column;gap:12px;
   box-shadow:inset 0 0 0 3px var(--krem),inset 0 0 0 6px var(--merah),0 20px 60px #000a}
 .modal-isi h2{font-size:1.25rem}
-footer{margin-top:4px;text-align:center;font-size:.8rem;color:var(--tinta2)}
+footer{margin-top:4px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:.8rem;color:var(--tinta2)}
+footer .logo-kecil{width:56px;height:auto;opacity:.85}
+footer a{color:var(--magenta);font-weight:700}
 
 @media (min-width:860px){
   .studio-grid{grid-template-columns:minmax(0,5fr) minmax(0,4fr);gap:24px}
@@ -157,7 +172,7 @@ footer{margin-top:4px;text-align:center;font-size:.8rem;color:var(--tinta2)}
 <body class="di-awal">
 <main id="utama">
   <header>
-    <h1><small>@rawznap.box</small><span id="judul">Photobooth Natal</span></h1>
+    <h1><img class="logo" src="logo-rawznap.webp" alt="RAWZNAP" width="1000" height="227"><span id="judul">Photobooth Natal</span></h1>
   </header>
 
   <div id="atas">
@@ -212,6 +227,7 @@ footer{margin-top:4px;text-align:center;font-size:.8rem;color:var(--tinta2)}
           <div class="upload-slots" id="slot-prev"></div>
           <label class="btn alt" for="file-galeri" id="lbl-galeri" style="display:block;text-align:center">Pilih foto dari galeri</label>
           <input type="file" id="file-galeri" accept="image/*" multiple hidden>
+          <input type="file" id="file-satu" accept="image/*" hidden>
           <p class="muted" id="info-upload"></p>
         </div>
         <div class="pesan" id="pesan-studio" hidden>
@@ -290,7 +306,7 @@ footer{margin-top:4px;text-align:center;font-size:.8rem;color:var(--tinta2)}
     </div>
   </div>
 
-  <footer>RAWZNAP · Photobox Kalimantan Barat</footer>
+  <footer><img class="logo-kecil" src="logo-rawznap.webp" alt="RAWZNAP" width="1000" height="227"><span>Photobox Kalimantan Barat · <a href="https://www.instagram.com/rawznap.box/">@rawznap.box</a></span></footer>
 </main>
 
 <script>
@@ -397,7 +413,7 @@ function muatConfig(){
     if(j && j.instagram) config.instagram = j.instagram;
     if(j && typeof j.counter === "string" && /^https:\/\//.test(j.counter)) config.counter = j.counter.replace(/\/+$/,"");
     mulaiCounter();
-    if(j && j.judul) { $("judul").textContent = j.judul; document.title = j.judul; }
+    if(j && j.judul) { $("judul").textContent = j.judul.replace(/^\s*rawznap\s*/i, "") || j.judul; document.title = j.judul; }
   }).catch(function(){
     $("frames").innerHTML = "";
     $("info-priv").textContent = "Frame belum bisa dimuat. Coba muat ulang halaman.";
@@ -436,7 +452,7 @@ function pilihFrame(i){
     putar = /^(kiri|ccw)$/i.test(frameDipilih.putar || "") ? "kiri" : /^(kanan|cw)$/i.test(frameDipilih.putar || "") ? "kanan" : null;
     fW = im.naturalWidth; fH = im.naturalHeight; skala = LEBAR_HASIL / fW;
     $("info-frame").textContent = "(" + slots.length + " foto)";
-    if(uploadFiles.length !== slots.length) bersihkanUpload();
+    sesuaikanUpload();
     siapkanLayarKamera(); gambarSlotUpload(); perbaruiTombol();
   };
   im.onerror = function(){ if(my === pilihToken) $("info-frame").textContent = "Frame ini gagal dimuat. Coba pilih frame lain."; };
@@ -451,7 +467,7 @@ function perbaruiTombol(){
     b.disabled = sedangJepret || !(siap && kameraSiap);
   } else {
     b.textContent = "Buat Foto";
-    b.disabled = !(siap && uploadFiles.length === slots.length);
+    b.disabled = !(siap && uploadLengkap());
   }
   $("frames").classList.toggle("terkunci", sedangJepret);
   $("btn-ganti-mode").disabled = sedangJepret;
@@ -477,33 +493,91 @@ function kameraGagal(pesan){
   setMode("upload", pesan);
 }
 function bersihkanUpload(){
-  uploadUrls.forEach(function(u){ URL.revokeObjectURL(u); });
+  uploadUrls.forEach(function(u){ if(u) URL.revokeObjectURL(u); });
   uploadUrls = []; uploadFiles = [];
 }
+function jumlahUpload(){
+  var n = slots.length, k = 0;
+  for(var i=0;i<n;i++) if(uploadFiles[i]) k++;
+  return k;
+}
+function uploadLengkap(){ return slots.length > 0 && jumlahUpload() === slots.length; }
+// rapikan daftar foto saat frame diganti: foto yang sudah dipilih tetap dipakai, kelebihannya dibuang
+function sesuaikanUpload(){
+  var n = slots.length;
+  for(var i=n;i<uploadUrls.length;i++) if(uploadUrls[i]) URL.revokeObjectURL(uploadUrls[i]);
+  uploadFiles = uploadFiles.slice(0, n); uploadUrls = uploadUrls.slice(0, n);
+}
+function isiSlot(i, file){
+  if(uploadUrls[i]) URL.revokeObjectURL(uploadUrls[i]);
+  uploadFiles[i] = file; uploadUrls[i] = URL.createObjectURL(file);
+}
+function hapusSlot(i){
+  if(uploadUrls[i]) URL.revokeObjectURL(uploadUrls[i]);
+  uploadFiles[i] = null; uploadUrls[i] = null;
+  gambarSlotUpload(); perbaruiTombol();
+}
+var slotTarget = -1;
 function gambarSlotUpload(){
   var w = $("slot-prev"); w.innerHTML = "";
   var n = slots.length || 3;
-  w.style.gridTemplateColumns = "repeat(" + Math.min(n, 4) + ",minmax(0,1fr))";
+  w.style.gridTemplateColumns = "repeat(" + Math.min(n, 3) + ",minmax(0,1fr))";
+  var rasio = slots.length ? ukuranFoto(0) : [4,3];
   for(var i=0;i<n;i++){
-    var d = document.createElement("div");
-    if(uploadUrls[i]){ var im = new Image(); im.src = uploadUrls[i]; im.alt = "Foto " + (i+1); d.appendChild(im); }
-    else d.textContent = String(i+1);
-    w.appendChild(d);
+    (function(i){
+      var d = document.createElement("div"); d.className = "slot-up";
+      d.style.aspectRatio = rasio[0] + " / " + rasio[1];
+      var b = document.createElement("button"); b.type = "button"; b.className = "slot-pilih";
+      if(uploadUrls[i]){
+        var im = new Image(); im.src = uploadUrls[i]; im.alt = ""; b.appendChild(im);
+        b.setAttribute("aria-label", "Foto " + (i+1) + " sudah dipilih. Ketuk untuk mengganti");
+        var no = document.createElement("span"); no.className = "slot-no"; no.textContent = String(i+1); b.appendChild(no);
+      } else {
+        b.innerHTML = '<strong>' + (i+1) + '</strong><small>+ Pilih foto</small>';
+        b.setAttribute("aria-label", "Pilih foto " + (i+1));
+      }
+      b.addEventListener("click", function(){
+        if(!slots.length) return;
+        slotTarget = i; $("file-satu").click();
+      });
+      d.appendChild(b);
+      if(uploadUrls[i]){
+        var x = document.createElement("button"); x.type = "button"; x.className = "slot-hapus";
+        x.textContent = "\u00D7"; x.setAttribute("aria-label", "Hapus foto " + (i+1));
+        x.addEventListener("click", function(){ hapusSlot(i); });
+        d.appendChild(x);
+      }
+      w.appendChild(d);
+    })(i);
   }
-  $("info-upload").textContent = uploadFiles.length === n
-    ? "Foto sudah dipilih. Tekan Buat Foto, atau pilih ulang."
-    : "Pilih tepat " + n + " foto dari galeri (urutan sesuai nomor).";
+  var k = jumlahUpload();
+  $("info-upload").textContent = !slots.length ? "Tunggu frame selesai dimuat."
+    : k === n ? "Semua foto siap. Tekan Buat Foto, atau ketuk foto untuk mengganti."
+    : k === 0 ? "Ketuk kotak bernomor untuk memilih foto satu per satu, atau pilih beberapa sekaligus lewat tombol di bawah."
+    : k + " dari " + n + " foto sudah dipilih. Pilih " + (n - k) + " lagi.";
+  $("lbl-galeri").textContent = k === 0 ? "Pilih foto dari galeri" : (k === n ? "Ganti semua foto" : "Tambah foto dari galeri");
 }
+// tombol besar: isi kotak yang masih kosong secara berurutan (kalau semua sudah terisi, mulai ulang dari kotak 1)
 function pilihFileGaleri(files){
-  files = Array.prototype.slice.call(files || []);
+  files = Array.prototype.slice.call(files || []).filter(function(f){ return !f.type || /^image\//.test(f.type); });
   var n = slots.length;
   if(!n){ $("info-upload").textContent = "Tunggu frame selesai dimuat, lalu pilih fotonya."; return; }
-  if(files.length !== n){
-    $("info-upload").textContent = "Frame ini butuh tepat " + n + " foto. Kamu memilih " + files.length + ". Pilih lagi.";
-    return;
-  }
-  bersihkanUpload();
-  uploadFiles = files; uploadUrls = files.map(function(f){ return URL.createObjectURL(f); });
+  if(!files.length) return;
+  if(jumlahUpload() === n) bersihkanUpload();
+  var lebih = 0;
+  files.forEach(function(f){
+    var kosong = -1;
+    for(var i=0;i<n;i++) if(!uploadFiles[i]){ kosong = i; break; }
+    if(kosong < 0){ lebih++; return; }
+    isiSlot(kosong, f);
+  });
+  gambarSlotUpload(); perbaruiTombol();
+  if(lebih) $("info-upload").textContent += " (" + lebih + " foto tidak dipakai karena frame ini hanya untuk " + n + " foto.)";
+}
+function pilihFileSatu(files){
+  var f = files && files[0];
+  if(!f || slotTarget < 0 || slotTarget >= slots.length) return;
+  isiSlot(slotTarget, f); slotTarget = -1;
   gambarSlotUpload(); perbaruiTombol();
 }
 
@@ -696,9 +770,9 @@ function jepretBerurutan(){
 // ====== BUAT DARI GALERI ======
 function buatDariGaleri(){
   var total = slots.length;
-  if(uploadFiles.length !== total) return;
+  if(!uploadLengkap()) return;
   $("btn-mulai").disabled = true;
-  Promise.all(uploadFiles.map(function(f, i){
+  Promise.all(uploadFiles.slice(0, total).map(function(f, i){
     return new Promise(function(res, rej){
       var u = URL.createObjectURL(f), im = new Image();
       im.onload = function(){
@@ -1110,6 +1184,7 @@ document.addEventListener("keydown", function(e){ if(e.key === "Escape" && !$("m
 $("btn-ig-modal").addEventListener("click", function(){ hit("ig"); setTimeout(tutupModalIg, 300); });
 $("pilih-kamera").addEventListener("change", function(e){ if(!sedangJepret) bukaKamera(e.target.value, true); });
 $("file-galeri").addEventListener("change", function(e){ pilihFileGaleri(e.target.files); e.target.value = ""; });
+$("file-satu").addEventListener("change", function(e){ pilihFileSatu(e.target.files); e.target.value = ""; });
 document.addEventListener("visibilitychange", function(){
   if(document.hidden){ if(!sedangJepret) hentikanKamera(); }
   else if(!$("s-studio").hidden && mode === "kamera" && !stream && !sedangJepret){ bukaKamera(kameraId, false); }

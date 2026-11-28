@@ -2,96 +2,103 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
+<meta name="theme-color" content="#14702a">
+<link rel="preload" href="bg-natal.webp" as="image">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>RAWZNAP Photobooth Natal</title>
 <style>
 :root{
-  --pine:#0f3d2e; --pine2:#0b2d22; --berry:#b3202f; --snow:#fff6e8; --gold:#ffd666; --ink:#10201a;
+  /* palet dari ilustrasi background */
+  --hijau:#14702a; --hijau-tua:#0b4d1b; --merah:#d0141f; --merah-tua:#9e0f18;
+  --magenta:#b5108f; --pink:#ff3fe0; --krem:#fff7e6; --krem2:#f3e3c3; --mint:#dff3e2; --kuning:#ffd23f;
+  --tinta:#2a1a10; --tinta2:#5c4433; --garis:#e2cfa6;
   --font:ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;min-height:100%}
-body{background:var(--pine2);color:var(--snow);font-family:var(--font);
-  background-image:radial-gradient(circle at 20% 10%,#164f3b 0,transparent 45%),radial-gradient(circle at 85% 90%,#5a1620 0,transparent 40%);
-  background-attachment:fixed;
+body{position:relative;background:#f1e2c4;color:var(--tinta);font-family:var(--font);
   min-height:100dvh;padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px));
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-main{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:16px;transition:max-width .2s}
+/* background ilustrasi: layar lebar = penuh di belakang panel */
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:#f1e2c4 url("bg-natal.webp") center/cover no-repeat}
+main{position:relative;max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:16px;transition:max-width .2s;
+  background:rgba(255,247,230,.95);border:5px solid var(--hijau);border-radius:26px;padding:22px 18px 18px;
+  box-shadow:inset 0 0 0 4px var(--krem),inset 0 0 0 7px var(--merah),0 18px 50px rgba(30,15,5,.45)}
 main.lebar{max-width:1040px}
-h1{font-size:1.6rem;line-height:1.15;margin:8px 0 0;text-wrap:balance}
-h1 small{display:block;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
-h2{margin:0;font-size:1.2rem}
+h1{font-size:1.6rem;line-height:1.15;margin:8px 0 0;text-wrap:balance;color:var(--hijau-tua)}
+h1 small{display:block;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--magenta);margin-bottom:6px}
+h2{margin:0;font-size:1.2rem;color:var(--hijau-tua)}
 p{margin:0;line-height:1.5}
-.muted{color:#cfe0d6;font-size:.92rem}
+.muted{color:var(--tinta2);font-size:.92rem}
 .screen{display:flex;flex-direction:column;gap:14px}
 .btn{appearance:none;border:0;border-radius:14px;padding:15px 18px;font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer;
-  background:var(--berry);color:#fff;min-height:52px;width:100%;transition:transform .08s}
-.btn:active{transform:scale(.98)}
-.btn:focus-visible,.frame:focus-visible,.pilihan:focus-visible,.tautan:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.btn.alt{background:transparent;border:2px solid #ffffff55;color:var(--snow)}
-.btn.gold{background:var(--gold);color:var(--ink)}
-.btn.ok{background:#1f7a52;color:#fff}
-.btn:disabled{opacity:.5;cursor:default}
+  background:var(--merah);color:#fff;min-height:52px;width:100%;transition:transform .08s;box-shadow:0 4px 0 var(--merah-tua)}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--merah-tua)}
+.btn:focus-visible,.frame:focus-visible,.pilihan:focus-visible,.tautan:focus-visible,.chip:focus-visible,.pilih:focus-visible{outline:3px solid var(--magenta);outline-offset:2px}
+.btn.alt{background:#fff;border:2px solid var(--hijau);color:var(--hijau-tua);box-shadow:none}
+.btn.gold{background:var(--magenta);color:#fff;box-shadow:0 4px 0 #7d0b63}
+.btn.ok{background:var(--hijau);color:#fff;box-shadow:0 4px 0 var(--hijau-tua)}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
 a.btn{display:block;text-align:center;text-decoration:none;line-height:22px}
-.tautan{appearance:none;background:none;border:0;color:var(--gold);font:inherit;font-weight:600;cursor:pointer;padding:8px 2px;text-decoration:underline;text-underline-offset:3px}
+.tautan{appearance:none;background:none;border:0;color:var(--hijau);font:inherit;font-weight:700;cursor:pointer;padding:8px 2px;text-decoration:underline;text-underline-offset:3px}
 .tautan:disabled{opacity:.4;cursor:default}
-.sosial{text-align:center;margin:0 0 12px;padding:8px 14px;border-radius:999px;background:#e8c87222;border:1px solid #e8c87255;color:#f3dca0;font-weight:600;font-size:14px}
-.hitung{background:#ffffff14;border:1px solid #ffffff22;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
-.hitung p{margin:0;font-size:.9rem;color:#cfe0d6}
-.hitung b{color:var(--snow)}
+.sosial{text-align:center;margin:0 0 12px;padding:8px 14px;border-radius:999px;background:#fde3f7;border:1px solid #f39be0;color:#7d0b63;font-weight:700;font-size:14px}
+.hitung{background:var(--hijau);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;color:var(--krem)}
+.hitung p{margin:0;font-size:.9rem;color:#e6f4e4}
+.hitung b{color:#fff}
 .kotak{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;text-align:center}
-.kotak div{background:#0b2d22;border-radius:10px;padding:8px 2px}
-.kotak strong{display:block;font-size:1.5rem;line-height:1.1;color:var(--gold);font-variant-numeric:tabular-nums}
-.kotak span{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:#cfe0d6}
-.hitung.akhir .kotak strong{color:#ff9a8f}
+.kotak div{background:var(--hijau-tua);border-radius:10px;padding:8px 2px}
+.kotak strong{display:block;font-size:1.5rem;line-height:1.1;color:var(--kuning);font-variant-numeric:tabular-nums}
+.kotak span{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:#d6eed8}
+.hitung.akhir .kotak strong{color:#ffb8bd}
 
 /* --- halaman awal: dua pilihan --- */
 .pilihan-wadah{display:grid;gap:12px;grid-template-columns:1fr}
-.pilihan{appearance:none;display:flex;align-items:center;gap:14px;text-align:left;font:inherit;color:var(--snow);cursor:pointer;
-  background:#ffffff14;border:2px solid #ffffff33;border-radius:18px;padding:18px 16px;transition:transform .08s,border-color .15s,background .15s}
-.pilihan:hover{border-color:var(--gold);background:#ffffff1f}
+.pilihan{appearance:none;display:flex;align-items:center;gap:14px;text-align:left;font:inherit;color:var(--tinta);cursor:pointer;
+  background:#fff;border:2px solid var(--garis);border-radius:18px;padding:18px 16px;transition:transform .08s,border-color .15s,background .15s}
+.pilihan:hover{border-color:var(--merah);background:#fff2f2}
 .pilihan:active{transform:scale(.985)}
-.pilihan svg{flex:none;width:44px;height:44px;color:var(--gold)}
-.pilihan strong{display:block;font-size:1.15rem}
-.pilihan span{display:block;font-size:.9rem;color:#cfe0d6;margin-top:2px}
+.pilihan svg{flex:none;width:44px;height:44px;color:var(--merah)}
+.pilihan strong{display:block;font-size:1.15rem;color:var(--hijau-tua)}
+.pilihan span{display:block;font-size:.9rem;color:var(--tinta2);margin-top:2px}
 
 /* --- studio: live kamera kiri, frame kanan --- */
 .bar-atas{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .studio-grid{display:grid;gap:18px;grid-template-columns:minmax(0,1fr);align-items:start}
 .kiri{display:flex;flex-direction:column;gap:12px}
 .kanan{display:flex;flex-direction:column;gap:10px}
-.kanan h2 small{font-weight:500;font-size:.85rem;color:#cfe0d6;margin-left:6px}
-.cam{position:relative;width:100%;aspect-ratio:520/390;background:#000;border-radius:16px;overflow:hidden;border:3px solid #ffffff33}
+.kanan h2 small{font-weight:600;font-size:.85rem;color:var(--tinta2);margin-left:6px}
+.cam{position:relative;width:100%;aspect-ratio:520/390;background:#000;border-radius:16px;overflow:hidden;border:4px solid var(--hijau)}
 .cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .cam video.cermin{transform:scaleX(-1)}
 .count{position:absolute;inset:0;display:grid;place-items:center;font-size:7rem;font-weight:800;color:#fff;text-shadow:0 4px 24px #0009;pointer-events:none}
 .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
 .flash.on{animation:fl .35s ease-out}
 @keyframes fl{0%{opacity:.95}100%{opacity:0}}
-.badge-live{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:6px;background:#000a;border-radius:999px;padding:4px 10px;font-size:.72rem;font-weight:700;letter-spacing:.1em}
+.badge-live{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:6px;background:#000a;color:#fff;border-radius:999px;padding:4px 10px;font-size:.72rem;font-weight:700;letter-spacing:.1em}
 .badge-live i{width:8px;height:8px;border-radius:50%;background:#ff4d4d;animation:kedip 1.2s infinite}
 @keyframes kedip{50%{opacity:.25}}
-.pilih{width:100%;min-height:46px;border-radius:12px;border:2px solid #ffffff44;background:#0b2d22;color:var(--snow);font:inherit;padding:0 12px}
+.pilih{width:100%;min-height:46px;border-radius:12px;border:2px solid var(--hijau);background:#fff;color:var(--tinta);font:inherit;padding:0 12px}
 .dots{display:flex;gap:8px;justify-content:center}
-.dots i{width:14px;height:14px;border-radius:50%;background:#ffffff33}
-.dots i.done{background:var(--gold)}
+.dots i{width:14px;height:14px;border-radius:50%;background:var(--garis)}
+.dots i.done{background:var(--magenta)}
 .thumbs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-.thumbs canvas{width:100%;height:auto;border-radius:6px;background:#0006}
+.thumbs canvas{width:100%;height:auto;border-radius:6px;background:var(--krem2)}
 .upload-slots{display:grid;gap:8px;grid-template-columns:repeat(3,minmax(0,1fr))}
-.upload-slots div{position:relative;aspect-ratio:4/3;border-radius:12px;border:2px dashed #ffffff55;background:#ffffff10;overflow:hidden;display:grid;place-items:center;color:#cfe0d6;font-weight:700;font-size:1.4rem}
+.upload-slots div{position:relative;aspect-ratio:4/3;border-radius:12px;border:2px dashed var(--hijau);background:var(--mint);overflow:hidden;display:grid;place-items:center;color:var(--hijau);font-weight:800;font-size:1.4rem}
 .upload-slots img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.pesan{background:#5a1620;border:1px solid #ff8a8a66;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;font-size:.92rem}
+.pesan{background:#ffe6e7;border:2px solid #f08c92;color:#7a0c13;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;font-size:.92rem}
 .frames{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px}
 .frames.terkunci{pointer-events:none;opacity:.55}
-.frame{appearance:none;border:3px solid transparent;border-radius:12px;padding:4px;background:#ffffff14;cursor:pointer;color:inherit;font:inherit}
-.frame img{display:block;width:100%;height:auto;aspect-ratio:1/3;border-radius:8px;background:#fff3}
-.frame span{display:block;margin-top:6px;font-size:.82rem;text-align:center}
-.frame[aria-pressed="true"]{border-color:var(--gold);background:#ffd66622}
+.frame{appearance:none;border:3px solid var(--garis);border-radius:12px;padding:4px;background:#fff;cursor:pointer;color:var(--tinta);font:inherit}
+.frame img{display:block;width:100%;height:auto;aspect-ratio:1/3;border-radius:8px;background:var(--krem2)}
+.frame span{display:block;margin-top:6px;font-size:.82rem;font-weight:600;text-align:center}
+.frame[aria-pressed="true"]{border-color:var(--magenta);background:#fde3f7}
 
 /* --- layar proses (animasi cetak) --- */
 .proses{align-items:center;text-align:center;padding-top:8px}
-.slot-cetak{position:relative;z-index:2;width:min(300px,80vw);height:28px;border-radius:16px;background:linear-gradient(#2b2b2b,#0b0b0b);box-shadow:0 6px 18px #000a}
+.slot-cetak{position:relative;z-index:2;width:min(300px,80vw);height:28px;border-radius:16px;background:linear-gradient(#2b2b2b,#0b0b0b);box-shadow:0 6px 18px #0007}
 .slot-cetak i{position:absolute;left:14px;right:14px;bottom:7px;height:5px;border-radius:3px;background:#000;box-shadow:inset 0 1px 3px #000, 0 1px 0 #ffffff22}
 .slot-cetak b{position:absolute;right:20px;top:7px;width:8px;height:8px;border-radius:50%;background:#58e08f;animation:kedip .9s infinite}
 .keluar{position:relative;overflow:hidden;width:min(170px,38vw,17vh);margin-top:-6px;border-radius:0 0 6px 6px}
@@ -99,28 +106,28 @@ a.btn{display:block;text-align:center;text-decoration:none;line-height:22px}
 .keluar img.jalan{animation:keluar 4s cubic-bezier(.45,.05,.35,1) forwards, cuci 4s ease-out forwards}
 @keyframes keluar{0%{transform:translateY(-100%)}100%{transform:translateY(0)}}
 @keyframes cuci{0%{filter:blur(10px) brightness(2) saturate(0)}60%{filter:blur(3px) brightness(1.25) saturate(.5)}100%{filter:none}}
-.progres{width:min(300px,80vw);height:10px;border-radius:6px;background:#ffffff22;overflow:hidden}
-.progres i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#ff9a8f);transition:width .2s}
+.progres{width:min(300px,80vw);height:10px;border-radius:6px;background:var(--krem2);overflow:hidden}
+.progres i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--merah),var(--magenta));transition:width .2s}
 
 /* --- hasil --- */
 .filter-baris{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
-.chip{appearance:none;border:2px solid #ffffff44;background:#ffffff14;color:var(--snow);border-radius:999px;padding:9px 16px;font:inherit;font-weight:700;cursor:pointer;min-height:42px}
-.chip[aria-pressed="true"]{border-color:var(--gold);background:#ffd66633;color:var(--gold)}
-.chip:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.chip{appearance:none;border:2px solid var(--hijau);background:#fff;color:var(--hijau-tua);border-radius:999px;padding:9px 16px;font:inherit;font-weight:700;cursor:pointer;min-height:42px}
+.chip[aria-pressed="true"]{border-color:var(--magenta);background:var(--magenta);color:#fff}
 .hasil-grid{display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;max-width:640px;width:100%;margin:0 auto}
 .hasil-grid:has(#gif-kartu[hidden]){grid-template-columns:minmax(0,300px);justify-content:center}
 .kartu{display:flex;flex-direction:column;gap:12px;align-items:center;animation:muncul .5s ease-out both}
 .kartu:nth-child(2){animation-delay:.15s}
 @keyframes muncul{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
-.kartu img{display:block;width:100%;max-width:300px;height:auto;border-radius:6px;box-shadow:0 10px 40px #0008;background:#fff2}
-.kartu .judul-kartu{font-weight:700;color:var(--gold);font-size:.85rem;letter-spacing:.1em;text-transform:uppercase}
+.kartu img{display:block;width:100%;max-width:300px;height:auto;border-radius:6px;box-shadow:0 10px 30px rgba(40,20,5,.35);background:var(--krem2)}
+.kartu .judul-kartu{font-weight:800;color:var(--magenta);font-size:.85rem;letter-spacing:.1em;text-transform:uppercase}
 .kartu .btn{max-width:300px;padding:13px 8px;font-size:1rem}
-.box{background:#ffffff14;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
-.err{background:#5a1620;border:1px solid #ff8a8a66}
-.modal{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:20px;background:#000a}
-.modal-isi{width:100%;max-width:400px;background:var(--pine);border:1px solid #ffffff33;border-radius:18px;padding:22px 18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 60px #000a}
+.box{background:#fff;border:2px solid var(--garis);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.err{background:#ffe6e7;border-color:#f08c92;color:#7a0c13}
+.modal{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:20px;background:rgba(20,10,5,.6)}
+.modal-isi{width:100%;max-width:400px;background:var(--krem);border:5px solid var(--hijau);border-radius:22px;padding:22px 18px;display:flex;flex-direction:column;gap:12px;
+  box-shadow:inset 0 0 0 3px var(--krem),inset 0 0 0 6px var(--merah),0 20px 60px #000a}
 .modal-isi h2{font-size:1.25rem}
-footer{margin-top:4px;text-align:center;font-size:.8rem;color:#9fb8aa}
+footer{margin-top:4px;text-align:center;font-size:.8rem;color:var(--tinta2)}
 
 @media (min-width:860px){
   .studio-grid{grid-template-columns:minmax(0,5fr) minmax(0,4fr);gap:24px}
@@ -129,6 +136,17 @@ footer{margin-top:4px;text-align:center;font-size:.8rem;color:#9fb8aa}
   .pilihan-wadah{grid-template-columns:1fr 1fr}
   .pilihan{flex-direction:column;text-align:center;padding:28px 18px}
   .pilihan svg{width:56px;height:56px}
+  main{padding:26px 28px 20px}
+}
+/* layar tegak (HP): ilustrasi tampil utuh sebagai banner di atas, tidak terpotong */
+@media (orientation:portrait) and (max-width:859px){
+  body{background:linear-gradient(#f6e7c9,#efdcb8) fixed}
+  body::before{position:absolute;inset:0 0 auto 0;height:56.25vw;background-size:100% auto;background-position:center top}
+  body.di-awal main{margin-top:calc(56.25vw - 46px)}
+  /* layar studio/hasil: banner diperkecil jadi pita hiasan supaya kamera tidak terdorong ke bawah */
+  body:not(.di-awal)::before{height:84px}
+  body:not(.di-awal) main{margin-top:44px}
+  main{padding:20px 14px 16px;border-width:4px}
 }
 @media (prefers-reduced-motion:reduce){
   .flash.on,.badge-live i,.slot-cetak b,.kartu{animation:none}.btn,main{transition:none}
@@ -136,7 +154,7 @@ footer{margin-top:4px;text-align:center;font-size:.8rem;color:#9fb8aa}
 }
 </style>
 </head>
-<body>
+<body class="di-awal">
 <main id="utama">
   <header>
     <h1><small>@rawznap.box</small><span id="judul">Photobooth Natal</span></h1>
@@ -336,6 +354,7 @@ function tampil(id){
   if(id === "s-awal" && sudahBerakhir()){ id = "s-selesai"; $("hitung").hidden = true; }
   ["s-awal","s-studio","s-proses","s-hasil","s-error","s-selesai"].forEach(function(s){ $(s).hidden = (s !== id); });
   $("atas").hidden = (id !== "s-awal");
+  document.body.classList.toggle("di-awal", id === "s-awal" || id === "s-selesai");
   $("utama").classList.toggle("lebar", id === "s-studio" || id === "s-hasil");
   window.scrollTo(0,0);
 }
